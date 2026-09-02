@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pydantic
+httpx
+openapi-core
+openai
+pytest
