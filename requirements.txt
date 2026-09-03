@@ -1,7 +1,9 @@
 fastapi
 uvicorn
+python-multipart
 pydantic
 httpx
+pyyaml
 openapi-core
 openai
 pytest

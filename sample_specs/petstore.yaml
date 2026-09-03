@@ -1,0 +1,133 @@
+openapi: 3.0.3
+
+info:
+  title: Simple Pet Store API
+  version: 1.0.0
+  description: A small API for managing pets.
+
+servers:
+  - url: http://localhost:8000
+
+paths:
+
+  /pets:
+    get:
+      summary: Get all pets
+      operationId: getPets
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pet"
+
+    post:
+      summary: Create a pet
+      operationId: createPet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePetRequest"
+      responses:
+        "201":
+          description: Pet created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+        "400":
+          description: Invalid request
+
+  /pets/{petId}:
+    get:
+      summary: Get a pet
+      operationId: getPet
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Pet found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+
+        "404":
+          description: Pet not found
+
+    delete:
+      summary: Delete a pet
+      operationId: deletePet
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "204":
+          description: Pet deleted
+
+        "404":
+          description: Pet not found
+
+components:
+
+  schemas:
+
+    CreatePetRequest:
+      type: object
+      required:
+        - name
+        - species
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 50
+
+        species:
+          type: string
+          enum:
+            - DOG
+            - CAT
+            - BIRD
+
+        age:
+          type: integer
+          minimum: 0
+          maximum: 30
+
+    Pet:
+      type: object
+      required:
+        - id
+        - name
+        - species
+      properties:
+        id:
+          type: integer
+
+        name:
+          type: string
+
+        species:
+          type: string
+          enum:
+            - DOG
+            - CAT
+            - BIRD
+
+        age:
+          type: integer
