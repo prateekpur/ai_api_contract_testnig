@@ -1,0 +1,2086 @@
+{
+  "id": "1e1ab87e-8d4c-44e2-8688-7f067fec06c4",
+  "title": "Insurance Policy API",
+  "version": "1.0.0",
+  "description": "API for creating, retrieving, updating and cancelling insurance policies.",
+  "base_url": "http://localhost:8000/api/v1",
+  "endpoints": [
+    {
+      "id": "81c05706-9d1a-4753-a9e4-a28a54b20460",
+      "path": "/customers/{customerId}",
+      "method": "GET",
+      "operation_id": "getCustomer",
+      "summary": "Get customer",
+      "description": null,
+      "tags": [
+        "Customers"
+      ],
+      "parameters": [
+        {
+          "name": "customerId",
+          "location": "path",
+          "required": true,
+          "description": "Unique customer identifier",
+          "schema_definition": {
+            "name": null,
+            "title": null,
+            "description": null,
+            "type": "integer",
+            "format": null,
+            "properties": null,
+            "items": null,
+            "required": [],
+            "enum": null,
+            "example": null,
+            "default": null,
+            "nullable": false,
+            "additional_properties": null,
+            "minimum": 1.0,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "min_items": null,
+            "max_items": null,
+            "pattern": null,
+            "$ref": null
+          },
+          "example": null
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "name": null,
+          "title": null,
+          "description": "Customer found",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": "#/components/schemas/Customer"
+        },
+        "404": {
+          "name": null,
+          "title": null,
+          "description": "Customer not found",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "deprecated": false
+    },
+    {
+      "id": "d0bfc2c9-20b2-4fd0-9094-8712627ddd71",
+      "path": "/policies",
+      "method": "GET",
+      "operation_id": "searchPolicies",
+      "summary": "Search policies",
+      "description": null,
+      "tags": [
+        "Policies"
+      ],
+      "parameters": [
+        {
+          "name": "customerId",
+          "location": "query",
+          "required": false,
+          "description": null,
+          "schema_definition": {
+            "name": null,
+            "title": null,
+            "description": null,
+            "type": "integer",
+            "format": null,
+            "properties": null,
+            "items": null,
+            "required": [],
+            "enum": null,
+            "example": null,
+            "default": null,
+            "nullable": false,
+            "additional_properties": null,
+            "minimum": 1.0,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "min_items": null,
+            "max_items": null,
+            "pattern": null,
+            "$ref": null
+          },
+          "example": null
+        },
+        {
+          "name": "status",
+          "location": "query",
+          "required": false,
+          "description": null,
+          "schema_definition": {
+            "name": null,
+            "title": null,
+            "description": null,
+            "type": null,
+            "format": null,
+            "properties": null,
+            "items": null,
+            "required": [],
+            "enum": null,
+            "example": null,
+            "default": null,
+            "nullable": false,
+            "additional_properties": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "min_items": null,
+            "max_items": null,
+            "pattern": null,
+            "$ref": "#/components/schemas/PolicyStatus"
+          },
+          "example": null
+        },
+        {
+          "name": "policyType",
+          "location": "query",
+          "required": false,
+          "description": null,
+          "schema_definition": {
+            "name": null,
+            "title": null,
+            "description": null,
+            "type": null,
+            "format": null,
+            "properties": null,
+            "items": null,
+            "required": [],
+            "enum": null,
+            "example": null,
+            "default": null,
+            "nullable": false,
+            "additional_properties": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "min_items": null,
+            "max_items": null,
+            "pattern": null,
+            "$ref": "#/components/schemas/PolicyType"
+          },
+          "example": null
+        },
+        {
+          "name": "page",
+          "location": "query",
+          "required": false,
+          "description": null,
+          "schema_definition": {
+            "name": null,
+            "title": null,
+            "description": null,
+            "type": "integer",
+            "format": null,
+            "properties": null,
+            "items": null,
+            "required": [],
+            "enum": null,
+            "example": null,
+            "default": 1,
+            "nullable": false,
+            "additional_properties": null,
+            "minimum": 1.0,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "min_items": null,
+            "max_items": null,
+            "pattern": null,
+            "$ref": null
+          },
+          "example": null
+        },
+        {
+          "name": "pageSize",
+          "location": "query",
+          "required": false,
+          "description": null,
+          "schema_definition": {
+            "name": null,
+            "title": null,
+            "description": null,
+            "type": "integer",
+            "format": null,
+            "properties": null,
+            "items": null,
+            "required": [],
+            "enum": null,
+            "example": null,
+            "default": 20,
+            "nullable": false,
+            "additional_properties": null,
+            "minimum": 1.0,
+            "maximum": 100.0,
+            "min_length": null,
+            "max_length": null,
+            "min_items": null,
+            "max_items": null,
+            "pattern": null,
+            "$ref": null
+          },
+          "example": null
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "name": null,
+          "title": null,
+          "description": "Policies retrieved successfully",
+          "type": "object",
+          "format": null,
+          "properties": {
+            "policies": {
+              "name": "policies",
+              "title": null,
+              "description": null,
+              "type": "array",
+              "format": null,
+              "properties": null,
+              "items": {
+                "name": null,
+                "title": null,
+                "description": null,
+                "type": null,
+                "format": null,
+                "properties": null,
+                "items": null,
+                "required": [],
+                "enum": null,
+                "example": null,
+                "default": null,
+                "nullable": false,
+                "additional_properties": null,
+                "minimum": null,
+                "maximum": null,
+                "min_length": null,
+                "max_length": null,
+                "min_items": null,
+                "max_items": null,
+                "pattern": null,
+                "$ref": "#/components/schemas/Policy"
+              },
+              "required": [],
+              "enum": null,
+              "example": null,
+              "default": null,
+              "nullable": false,
+              "additional_properties": null,
+              "minimum": null,
+              "maximum": null,
+              "min_length": null,
+              "max_length": null,
+              "min_items": null,
+              "max_items": null,
+              "pattern": null,
+              "$ref": null
+            },
+            "total": {
+              "name": "total",
+              "title": null,
+              "description": null,
+              "type": "integer",
+              "format": null,
+              "properties": null,
+              "items": null,
+              "required": [],
+              "enum": null,
+              "example": null,
+              "default": null,
+              "nullable": false,
+              "additional_properties": null,
+              "minimum": 0.0,
+              "maximum": null,
+              "min_length": null,
+              "max_length": null,
+              "min_items": null,
+              "max_items": null,
+              "pattern": null,
+              "$ref": null
+            }
+          },
+          "items": null,
+          "required": [
+            "policies",
+            "total"
+          ],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "400": {
+          "name": null,
+          "title": null,
+          "description": "Invalid search parameters",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "deprecated": false
+    },
+    {
+      "id": "b9a05574-8203-4924-9646-aab6573e995e",
+      "path": "/policies",
+      "method": "POST",
+      "operation_id": "createPolicy",
+      "summary": "Create insurance policy",
+      "description": null,
+      "tags": [
+        "Policies"
+      ],
+      "parameters": [],
+      "request_body": {
+        "name": null,
+        "title": null,
+        "description": null,
+        "type": null,
+        "format": null,
+        "properties": null,
+        "items": null,
+        "required": [],
+        "enum": null,
+        "example": null,
+        "default": null,
+        "nullable": false,
+        "additional_properties": null,
+        "minimum": null,
+        "maximum": null,
+        "min_length": null,
+        "max_length": null,
+        "min_items": null,
+        "max_items": null,
+        "pattern": null,
+        "$ref": "#/components/schemas/CreatePolicyRequest"
+      },
+      "responses": {
+        "201": {
+          "name": null,
+          "title": null,
+          "description": "Policy created successfully",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": "#/components/schemas/Policy"
+        },
+        "400": {
+          "name": null,
+          "title": null,
+          "description": "Invalid policy request",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "404": {
+          "name": null,
+          "title": null,
+          "description": "Customer not found",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "409": {
+          "name": null,
+          "title": null,
+          "description": "Policy already exists",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "deprecated": false
+    },
+    {
+      "id": "4f8bfca7-53b4-4b34-a2e0-0200df550468",
+      "path": "/policies/{policyId}",
+      "method": "GET",
+      "operation_id": "getPolicy",
+      "summary": "Get policy",
+      "description": null,
+      "tags": [
+        "Policies"
+      ],
+      "parameters": [
+        {
+          "name": "policyId",
+          "location": "path",
+          "required": true,
+          "description": "Unique policy identifier",
+          "schema_definition": {
+            "name": null,
+            "title": null,
+            "description": null,
+            "type": "string",
+            "format": null,
+            "properties": null,
+            "items": null,
+            "required": [],
+            "enum": null,
+            "example": null,
+            "default": null,
+            "nullable": false,
+            "additional_properties": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "min_items": null,
+            "max_items": null,
+            "pattern": "^POL-[0-9]{8}$",
+            "$ref": null
+          },
+          "example": null
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "name": null,
+          "title": null,
+          "description": "Policy found",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": "#/components/schemas/Policy"
+        },
+        "404": {
+          "name": null,
+          "title": null,
+          "description": "Policy not found",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "deprecated": false
+    },
+    {
+      "id": "b5170c9f-15ec-469d-9d15-d5913fa72b7c",
+      "path": "/policies/{policyId}",
+      "method": "PUT",
+      "operation_id": "updatePolicy",
+      "summary": "Update policy",
+      "description": null,
+      "tags": [
+        "Policies"
+      ],
+      "parameters": [
+        {
+          "name": "policyId",
+          "location": "path",
+          "required": true,
+          "description": null,
+          "schema_definition": {
+            "name": null,
+            "title": null,
+            "description": null,
+            "type": "string",
+            "format": null,
+            "properties": null,
+            "items": null,
+            "required": [],
+            "enum": null,
+            "example": null,
+            "default": null,
+            "nullable": false,
+            "additional_properties": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "min_items": null,
+            "max_items": null,
+            "pattern": "^POL-[0-9]{8}$",
+            "$ref": null
+          },
+          "example": null
+        }
+      ],
+      "request_body": {
+        "name": null,
+        "title": null,
+        "description": null,
+        "type": null,
+        "format": null,
+        "properties": null,
+        "items": null,
+        "required": [],
+        "enum": null,
+        "example": null,
+        "default": null,
+        "nullable": false,
+        "additional_properties": null,
+        "minimum": null,
+        "maximum": null,
+        "min_length": null,
+        "max_length": null,
+        "min_items": null,
+        "max_items": null,
+        "pattern": null,
+        "$ref": "#/components/schemas/UpdatePolicyRequest"
+      },
+      "responses": {
+        "200": {
+          "name": null,
+          "title": null,
+          "description": "Policy updated successfully",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": "#/components/schemas/Policy"
+        },
+        "400": {
+          "name": null,
+          "title": null,
+          "description": "Invalid update request",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "404": {
+          "name": null,
+          "title": null,
+          "description": "Policy not found",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "deprecated": false
+    },
+    {
+      "id": "d015fb9b-c774-4658-b1ff-10996dfa4d36",
+      "path": "/policies/{policyId}",
+      "method": "DELETE",
+      "operation_id": "cancelPolicy",
+      "summary": "Cancel policy",
+      "description": null,
+      "tags": [
+        "Policies"
+      ],
+      "parameters": [
+        {
+          "name": "policyId",
+          "location": "path",
+          "required": true,
+          "description": null,
+          "schema_definition": {
+            "name": null,
+            "title": null,
+            "description": null,
+            "type": "string",
+            "format": null,
+            "properties": null,
+            "items": null,
+            "required": [],
+            "enum": null,
+            "example": null,
+            "default": null,
+            "nullable": false,
+            "additional_properties": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "min_items": null,
+            "max_items": null,
+            "pattern": "^POL-[0-9]{8}$",
+            "$ref": null
+          },
+          "example": null
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "204": {
+          "name": null,
+          "title": null,
+          "description": "Policy cancelled successfully",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "404": {
+          "name": null,
+          "title": null,
+          "description": "Policy not found",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "409": {
+          "name": null,
+          "title": null,
+          "description": "Policy cannot be cancelled in its current state",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "deprecated": false
+    }
+  ],
+  "schemas": {
+    "PolicyStatus": {
+      "name": "PolicyStatus",
+      "title": null,
+      "description": null,
+      "type": "string",
+      "format": null,
+      "properties": null,
+      "items": null,
+      "required": [],
+      "enum": [
+        "QUOTE",
+        "ACTIVE",
+        "EXPIRED",
+        "CANCELLED"
+      ],
+      "example": null,
+      "default": null,
+      "nullable": false,
+      "additional_properties": null,
+      "minimum": null,
+      "maximum": null,
+      "min_length": null,
+      "max_length": null,
+      "min_items": null,
+      "max_items": null,
+      "pattern": null,
+      "$ref": null
+    },
+    "PolicyType": {
+      "name": "PolicyType",
+      "title": null,
+      "description": null,
+      "type": "string",
+      "format": null,
+      "properties": null,
+      "items": null,
+      "required": [],
+      "enum": [
+        "AUTO",
+        "HOME",
+        "LIFE"
+      ],
+      "example": null,
+      "default": null,
+      "nullable": false,
+      "additional_properties": null,
+      "minimum": null,
+      "maximum": null,
+      "min_length": null,
+      "max_length": null,
+      "min_items": null,
+      "max_items": null,
+      "pattern": null,
+      "$ref": null
+    },
+    "Customer": {
+      "name": "Customer",
+      "title": null,
+      "description": null,
+      "type": "object",
+      "format": null,
+      "properties": {
+        "customerId": {
+          "name": "customerId",
+          "title": null,
+          "description": null,
+          "type": "integer",
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": 1.0,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "firstName": {
+          "name": "firstName",
+          "title": null,
+          "description": null,
+          "type": "string",
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": 1,
+          "max_length": 50,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "lastName": {
+          "name": "lastName",
+          "title": null,
+          "description": null,
+          "type": "string",
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": 1,
+          "max_length": 50,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "email": {
+          "name": "email",
+          "title": null,
+          "description": null,
+          "type": "string",
+          "format": "email",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "phone": {
+          "name": "phone",
+          "title": null,
+          "description": null,
+          "type": "string",
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": "^\\+?[1-9][0-9]{7,14}$",
+          "$ref": null
+        }
+      },
+      "items": null,
+      "required": [
+        "customerId",
+        "firstName",
+        "lastName",
+        "email"
+      ],
+      "enum": null,
+      "example": null,
+      "default": null,
+      "nullable": false,
+      "additional_properties": null,
+      "minimum": null,
+      "maximum": null,
+      "min_length": null,
+      "max_length": null,
+      "min_items": null,
+      "max_items": null,
+      "pattern": null,
+      "$ref": null
+    },
+    "CreatePolicyRequest": {
+      "name": "CreatePolicyRequest",
+      "title": null,
+      "description": null,
+      "type": "object",
+      "format": null,
+      "properties": {
+        "customerId": {
+          "name": "customerId",
+          "title": null,
+          "description": null,
+          "type": "integer",
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": 1.0,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "policyType": {
+          "name": "policyType",
+          "title": null,
+          "description": null,
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": "#/components/schemas/PolicyType"
+        },
+        "effectiveDate": {
+          "name": "effectiveDate",
+          "title": null,
+          "description": null,
+          "type": "string",
+          "format": "date",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "expirationDate": {
+          "name": "expirationDate",
+          "title": null,
+          "description": null,
+          "type": "string",
+          "format": "date",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "premium": {
+          "name": "premium",
+          "title": null,
+          "description": null,
+          "type": "number",
+          "format": "double",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": 0.01,
+          "maximum": 1000000.0,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "deductible": {
+          "name": "deductible",
+          "title": null,
+          "description": null,
+          "type": "number",
+          "format": "double",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": 0.0,
+          "maximum": 100000.0,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "coverageAmount": {
+          "name": "coverageAmount",
+          "title": null,
+          "description": null,
+          "type": "number",
+          "format": "double",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": 1000.0,
+          "maximum": 10000000.0,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "items": null,
+      "required": [
+        "customerId",
+        "policyType",
+        "effectiveDate",
+        "expirationDate",
+        "premium"
+      ],
+      "enum": null,
+      "example": null,
+      "default": null,
+      "nullable": false,
+      "additional_properties": null,
+      "minimum": null,
+      "maximum": null,
+      "min_length": null,
+      "max_length": null,
+      "min_items": null,
+      "max_items": null,
+      "pattern": null,
+      "$ref": null
+    },
+    "UpdatePolicyRequest": {
+      "name": "UpdatePolicyRequest",
+      "title": null,
+      "description": null,
+      "type": "object",
+      "format": null,
+      "properties": {
+        "premium": {
+          "name": "premium",
+          "title": null,
+          "description": null,
+          "type": "number",
+          "format": "double",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": 0.01,
+          "maximum": 1000000.0,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "deductible": {
+          "name": "deductible",
+          "title": null,
+          "description": null,
+          "type": "number",
+          "format": "double",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": 0.0,
+          "maximum": 100000.0,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "coverageAmount": {
+          "name": "coverageAmount",
+          "title": null,
+          "description": null,
+          "type": "number",
+          "format": "double",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": 1000.0,
+          "maximum": 10000000.0,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "expirationDate": {
+          "name": "expirationDate",
+          "title": null,
+          "description": null,
+          "type": "string",
+          "format": "date",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "items": null,
+      "required": [],
+      "enum": null,
+      "example": null,
+      "default": null,
+      "nullable": false,
+      "additional_properties": null,
+      "minimum": null,
+      "maximum": null,
+      "min_length": null,
+      "max_length": null,
+      "min_items": null,
+      "max_items": null,
+      "pattern": null,
+      "$ref": null
+    },
+    "Policy": {
+      "name": "Policy",
+      "title": null,
+      "description": null,
+      "type": "object",
+      "format": null,
+      "properties": {
+        "policyId": {
+          "name": "policyId",
+          "title": null,
+          "description": null,
+          "type": "string",
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": "^POL-[0-9]{8}$",
+          "$ref": null
+        },
+        "customerId": {
+          "name": "customerId",
+          "title": null,
+          "description": null,
+          "type": "integer",
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": 1.0,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "policyType": {
+          "name": "policyType",
+          "title": null,
+          "description": null,
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": "#/components/schemas/PolicyType"
+        },
+        "status": {
+          "name": "status",
+          "title": null,
+          "description": null,
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": "#/components/schemas/PolicyStatus"
+        },
+        "effectiveDate": {
+          "name": "effectiveDate",
+          "title": null,
+          "description": null,
+          "type": "string",
+          "format": "date",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "expirationDate": {
+          "name": "expirationDate",
+          "title": null,
+          "description": null,
+          "type": "string",
+          "format": "date",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "premium": {
+          "name": "premium",
+          "title": null,
+          "description": null,
+          "type": "number",
+          "format": "double",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": 0.0,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "deductible": {
+          "name": "deductible",
+          "title": null,
+          "description": null,
+          "type": "number",
+          "format": "double",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": 0.0,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "coverageAmount": {
+          "name": "coverageAmount",
+          "title": null,
+          "description": null,
+          "type": "number",
+          "format": "double",
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": 0.0,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "items": null,
+      "required": [
+        "policyId",
+        "customerId",
+        "policyType",
+        "status",
+        "effectiveDate",
+        "expirationDate",
+        "premium"
+      ],
+      "enum": null,
+      "example": null,
+      "default": null,
+      "nullable": false,
+      "additional_properties": null,
+      "minimum": null,
+      "maximum": null,
+      "min_length": null,
+      "max_length": null,
+      "min_items": null,
+      "max_items": null,
+      "pattern": null,
+      "$ref": null
+    }
+  },
+  "raw_spec": {
+    "openapi": "3.0.3",
+    "info": {
+      "title": "Insurance Policy API",
+      "version": "1.0.0",
+      "description": "API for creating, retrieving, updating and cancelling insurance policies."
+    },
+    "servers": [
+      {
+        "url": "http://localhost:8000/api/v1"
+      }
+    ],
+    "tags": [
+      {
+        "name": "Policies",
+        "description": "Insurance policy operations"
+      },
+      {
+        "name": "Customers",
+        "description": "Customer operations"
+      }
+    ],
+    "paths": {
+      "/customers/{customerId}": {
+        "get": {
+          "tags": [
+            "Customers"
+          ],
+          "summary": "Get customer",
+          "operationId": "getCustomer",
+          "parameters": [
+            {
+              "name": "customerId",
+              "in": "path",
+              "required": true,
+              "description": "Unique customer identifier",
+              "schema": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Customer found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Customer not found"
+            }
+          }
+        }
+      },
+      "/policies": {
+        "get": {
+          "tags": [
+            "Policies"
+          ],
+          "summary": "Search policies",
+          "operationId": "searchPolicies",
+          "parameters": [
+            {
+              "name": "customerId",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            {
+              "name": "status",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "$ref": "#/components/schemas/PolicyStatus"
+              }
+            },
+            {
+              "name": "policyType",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "$ref": "#/components/schemas/PolicyType"
+              }
+            },
+            {
+              "name": "page",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "default": 1
+              }
+            },
+            {
+              "name": "pageSize",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 20
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Policies retrieved successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "required": [
+                      "policies",
+                      "total"
+                    ],
+                    "properties": {
+                      "policies": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/components/schemas/Policy"
+                        }
+                      },
+                      "total": {
+                        "type": "integer",
+                        "minimum": 0
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid search parameters"
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Policies"
+          ],
+          "summary": "Create insurance policy",
+          "operationId": "createPolicy",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePolicyRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Policy created successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Policy"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid policy request"
+            },
+            "404": {
+              "description": "Customer not found"
+            },
+            "409": {
+              "description": "Policy already exists"
+            }
+          }
+        }
+      },
+      "/policies/{policyId}": {
+        "get": {
+          "tags": [
+            "Policies"
+          ],
+          "summary": "Get policy",
+          "operationId": "getPolicy",
+          "parameters": [
+            {
+              "name": "policyId",
+              "in": "path",
+              "required": true,
+              "description": "Unique policy identifier",
+              "schema": {
+                "type": "string",
+                "pattern": "^POL-[0-9]{8}$"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Policy found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Policy"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Policy not found"
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Policies"
+          ],
+          "summary": "Update policy",
+          "operationId": "updatePolicy",
+          "parameters": [
+            {
+              "name": "policyId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "pattern": "^POL-[0-9]{8}$"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePolicyRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Policy updated successfully",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Policy"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid update request"
+            },
+            "404": {
+              "description": "Policy not found"
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Policies"
+          ],
+          "summary": "Cancel policy",
+          "operationId": "cancelPolicy",
+          "parameters": [
+            {
+              "name": "policyId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "pattern": "^POL-[0-9]{8}$"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Policy cancelled successfully"
+            },
+            "404": {
+              "description": "Policy not found"
+            },
+            "409": {
+              "description": "Policy cannot be cancelled in its current state"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "PolicyStatus": {
+          "type": "string",
+          "enum": [
+            "QUOTE",
+            "ACTIVE",
+            "EXPIRED",
+            "CANCELLED"
+          ]
+        },
+        "PolicyType": {
+          "type": "string",
+          "enum": [
+            "AUTO",
+            "HOME",
+            "LIFE"
+          ]
+        },
+        "Customer": {
+          "type": "object",
+          "required": [
+            "customerId",
+            "firstName",
+            "lastName",
+            "email"
+          ],
+          "properties": {
+            "customerId": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "firstName": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            },
+            "lastName": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "phone": {
+              "type": "string",
+              "pattern": "^\\+?[1-9][0-9]{7,14}$"
+            }
+          }
+        },
+        "CreatePolicyRequest": {
+          "type": "object",
+          "required": [
+            "customerId",
+            "policyType",
+            "effectiveDate",
+            "expirationDate",
+            "premium"
+          ],
+          "properties": {
+            "customerId": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "policyType": {
+              "$ref": "#/components/schemas/PolicyType"
+            },
+            "effectiveDate": {
+              "type": "string",
+              "format": "date"
+            },
+            "expirationDate": {
+              "type": "string",
+              "format": "date"
+            },
+            "premium": {
+              "type": "number",
+              "format": "double",
+              "minimum": 0.01,
+              "maximum": 1000000
+            },
+            "deductible": {
+              "type": "number",
+              "format": "double",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "coverageAmount": {
+              "type": "number",
+              "format": "double",
+              "minimum": 1000,
+              "maximum": 10000000
+            }
+          }
+        },
+        "UpdatePolicyRequest": {
+          "type": "object",
+          "properties": {
+            "premium": {
+              "type": "number",
+              "format": "double",
+              "minimum": 0.01,
+              "maximum": 1000000
+            },
+            "deductible": {
+              "type": "number",
+              "format": "double",
+              "minimum": 0,
+              "maximum": 100000
+            },
+            "coverageAmount": {
+              "type": "number",
+              "format": "double",
+              "minimum": 1000,
+              "maximum": 10000000
+            },
+            "expirationDate": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        },
+        "Policy": {
+          "type": "object",
+          "required": [
+            "policyId",
+            "customerId",
+            "policyType",
+            "status",
+            "effectiveDate",
+            "expirationDate",
+            "premium"
+          ],
+          "properties": {
+            "policyId": {
+              "type": "string",
+              "pattern": "^POL-[0-9]{8}$"
+            },
+            "customerId": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "policyType": {
+              "$ref": "#/components/schemas/PolicyType"
+            },
+            "status": {
+              "$ref": "#/components/schemas/PolicyStatus"
+            },
+            "effectiveDate": {
+              "type": "string",
+              "format": "date"
+            },
+            "expirationDate": {
+              "type": "string",
+              "format": "date"
+            },
+            "premium": {
+              "type": "number",
+              "format": "double",
+              "minimum": 0
+            },
+            "deductible": {
+              "type": "number",
+              "format": "double",
+              "minimum": 0
+            },
+            "coverageAmount": {
+              "type": "number",
+              "format": "double",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    }
+  }
+}

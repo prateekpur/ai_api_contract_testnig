@@ -1,0 +1,736 @@
+{
+  "id": "4e229562-a95c-4f9e-9d7f-12f3a46c383c",
+  "title": "Simple Pet Store API",
+  "version": "1.0.0",
+  "description": "A small API for managing pets.",
+  "base_url": "http://localhost:8000",
+  "endpoints": [
+    {
+      "id": "54651cbd-a044-4169-94af-bccf3e8a2367",
+      "path": "/pets",
+      "method": "GET",
+      "operation_id": "getPets",
+      "summary": "Get all pets",
+      "description": null,
+      "tags": [],
+      "parameters": [],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "name": null,
+          "title": null,
+          "description": "Successful response",
+          "type": "array",
+          "format": null,
+          "properties": null,
+          "items": {
+            "name": null,
+            "title": null,
+            "description": null,
+            "type": null,
+            "format": null,
+            "properties": null,
+            "items": null,
+            "required": [],
+            "enum": null,
+            "example": null,
+            "default": null,
+            "nullable": false,
+            "additional_properties": null,
+            "minimum": null,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "min_items": null,
+            "max_items": null,
+            "pattern": null,
+            "$ref": "#/components/schemas/Pet"
+          },
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "deprecated": false
+    },
+    {
+      "id": "266574b8-c33f-4221-998b-46f53588680c",
+      "path": "/pets",
+      "method": "POST",
+      "operation_id": "createPet",
+      "summary": "Create a pet",
+      "description": null,
+      "tags": [],
+      "parameters": [],
+      "request_body": {
+        "name": null,
+        "title": null,
+        "description": null,
+        "type": null,
+        "format": null,
+        "properties": null,
+        "items": null,
+        "required": [],
+        "enum": null,
+        "example": null,
+        "default": null,
+        "nullable": false,
+        "additional_properties": null,
+        "minimum": null,
+        "maximum": null,
+        "min_length": null,
+        "max_length": null,
+        "min_items": null,
+        "max_items": null,
+        "pattern": null,
+        "$ref": "#/components/schemas/CreatePetRequest"
+      },
+      "responses": {
+        "201": {
+          "name": null,
+          "title": null,
+          "description": "Pet created",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": "#/components/schemas/Pet"
+        },
+        "400": {
+          "name": null,
+          "title": null,
+          "description": "Invalid request",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "deprecated": false
+    },
+    {
+      "id": "7e6729ab-f611-4eed-8feb-d2b5b7cde96b",
+      "path": "/pets/{petId}",
+      "method": "GET",
+      "operation_id": "getPet",
+      "summary": "Get a pet",
+      "description": null,
+      "tags": [],
+      "parameters": [
+        {
+          "name": "petId",
+          "location": "path",
+          "required": true,
+          "description": null,
+          "schema_definition": {
+            "name": null,
+            "title": null,
+            "description": null,
+            "type": "integer",
+            "format": null,
+            "properties": null,
+            "items": null,
+            "required": [],
+            "enum": null,
+            "example": null,
+            "default": null,
+            "nullable": false,
+            "additional_properties": null,
+            "minimum": 1.0,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "min_items": null,
+            "max_items": null,
+            "pattern": null,
+            "$ref": null
+          },
+          "example": null
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "200": {
+          "name": null,
+          "title": null,
+          "description": "Pet found",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": "#/components/schemas/Pet"
+        },
+        "404": {
+          "name": null,
+          "title": null,
+          "description": "Pet not found",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "deprecated": false
+    },
+    {
+      "id": "614d7ac9-7fee-474d-88bc-cd48b6d27617",
+      "path": "/pets/{petId}",
+      "method": "DELETE",
+      "operation_id": "deletePet",
+      "summary": "Delete a pet",
+      "description": null,
+      "tags": [],
+      "parameters": [
+        {
+          "name": "petId",
+          "location": "path",
+          "required": true,
+          "description": null,
+          "schema_definition": {
+            "name": null,
+            "title": null,
+            "description": null,
+            "type": "integer",
+            "format": null,
+            "properties": null,
+            "items": null,
+            "required": [],
+            "enum": null,
+            "example": null,
+            "default": null,
+            "nullable": false,
+            "additional_properties": null,
+            "minimum": 1.0,
+            "maximum": null,
+            "min_length": null,
+            "max_length": null,
+            "min_items": null,
+            "max_items": null,
+            "pattern": null,
+            "$ref": null
+          },
+          "example": null
+        }
+      ],
+      "request_body": null,
+      "responses": {
+        "204": {
+          "name": null,
+          "title": null,
+          "description": "Pet deleted",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "404": {
+          "name": null,
+          "title": null,
+          "description": "Pet not found",
+          "type": null,
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "deprecated": false
+    }
+  ],
+  "schemas": {
+    "CreatePetRequest": {
+      "name": "CreatePetRequest",
+      "title": null,
+      "description": null,
+      "type": "object",
+      "format": null,
+      "properties": {
+        "name": {
+          "name": "name",
+          "title": null,
+          "description": null,
+          "type": "string",
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": 2,
+          "max_length": 50,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "species": {
+          "name": "species",
+          "title": null,
+          "description": null,
+          "type": "string",
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": [
+            "DOG",
+            "CAT",
+            "BIRD"
+          ],
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "age": {
+          "name": "age",
+          "title": null,
+          "description": null,
+          "type": "integer",
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": 0.0,
+          "maximum": 30.0,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "items": null,
+      "required": [
+        "name",
+        "species"
+      ],
+      "enum": null,
+      "example": null,
+      "default": null,
+      "nullable": false,
+      "additional_properties": null,
+      "minimum": null,
+      "maximum": null,
+      "min_length": null,
+      "max_length": null,
+      "min_items": null,
+      "max_items": null,
+      "pattern": null,
+      "$ref": null
+    },
+    "Pet": {
+      "name": "Pet",
+      "title": null,
+      "description": null,
+      "type": "object",
+      "format": null,
+      "properties": {
+        "id": {
+          "name": "id",
+          "title": null,
+          "description": null,
+          "type": "integer",
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "name": {
+          "name": "name",
+          "title": null,
+          "description": null,
+          "type": "string",
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "species": {
+          "name": "species",
+          "title": null,
+          "description": null,
+          "type": "string",
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": [
+            "DOG",
+            "CAT",
+            "BIRD"
+          ],
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        },
+        "age": {
+          "name": "age",
+          "title": null,
+          "description": null,
+          "type": "integer",
+          "format": null,
+          "properties": null,
+          "items": null,
+          "required": [],
+          "enum": null,
+          "example": null,
+          "default": null,
+          "nullable": false,
+          "additional_properties": null,
+          "minimum": null,
+          "maximum": null,
+          "min_length": null,
+          "max_length": null,
+          "min_items": null,
+          "max_items": null,
+          "pattern": null,
+          "$ref": null
+        }
+      },
+      "items": null,
+      "required": [
+        "id",
+        "name",
+        "species"
+      ],
+      "enum": null,
+      "example": null,
+      "default": null,
+      "nullable": false,
+      "additional_properties": null,
+      "minimum": null,
+      "maximum": null,
+      "min_length": null,
+      "max_length": null,
+      "min_items": null,
+      "max_items": null,
+      "pattern": null,
+      "$ref": null
+    }
+  },
+  "raw_spec": {
+    "openapi": "3.0.3",
+    "info": {
+      "title": "Simple Pet Store API",
+      "version": "1.0.0",
+      "description": "A small API for managing pets."
+    },
+    "servers": [
+      {
+        "url": "http://localhost:8000"
+      }
+    ],
+    "paths": {
+      "/pets": {
+        "get": {
+          "summary": "Get all pets",
+          "operationId": "getPets",
+          "responses": {
+            "200": {
+              "description": "Successful response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Pet"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "summary": "Create a pet",
+          "operationId": "createPet",
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePetRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Pet created",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Pet"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid request"
+            }
+          }
+        }
+      },
+      "/pets/{petId}": {
+        "get": {
+          "summary": "Get a pet",
+          "operationId": "getPet",
+          "parameters": [
+            {
+              "name": "petId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Pet found",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Pet"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Pet not found"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Delete a pet",
+          "operationId": "deletePet",
+          "parameters": [
+            {
+              "name": "petId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Pet deleted"
+            },
+            "404": {
+              "description": "Pet not found"
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "CreatePetRequest": {
+          "type": "object",
+          "required": [
+            "name",
+            "species"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 50
+            },
+            "species": {
+              "type": "string",
+              "enum": [
+                "DOG",
+                "CAT",
+                "BIRD"
+              ]
+            },
+            "age": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 30
+            }
+          }
+        },
+        "Pet": {
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "species"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "species": {
+              "type": "string",
+              "enum": [
+                "DOG",
+                "CAT",
+                "BIRD"
+              ]
+            },
+            "age": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    }
+  }
+}

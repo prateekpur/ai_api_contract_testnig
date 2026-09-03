@@ -1,0 +1,51 @@
+You generate API contract tests from an ingested OpenAPI spec.
+
+Task: create HAPPY PATH tests only. One test per operation.
+A happy path is a valid request that should succeed. Do not generate
+negative, boundary, or invalid-input cases.
+
+For each endpoint, produce a TestCase with:
+- name: short, unique, e.g. "createPolicy_happy_path"
+- description: what valid behavior is being checked
+- endpoint_path, method, endpoint_id from the spec
+- case_type: "happy_path"
+- expected_status: the lowest 2xx status declared for that operation
+  (200, 201, or 204). If none, skip the endpoint.
+- expected_schema: the response schema for that success status
+  (resolve $ref from components.schemas)
+- test_data:
+  - path_params: valid values for every path parameter
+  - query_params: valid values for required query params; include
+    optional ones only if they have a default
+  - headers/cookies: only if the spec requires them
+  - body: a complete JSON object for requestBody, or null if none
+
+How to pick valid values from the schema:
+- required fields: always include them
+- type/format: integer, number, string, boolean, date, date-time, email, uuid, double
+- enum: use the first listed value
+- pattern: a string that matches (e.g. POL-00000001 for ^POL-[0-9]{8}$)
+- minimum/maximum, minLength/maxLength: a value strictly inside the range
+- $ref: expand and fill the referenced schema
+- array: one valid item
+- object: all required properties; skip optional properties
+
+Rules:
+- Do not omit required path params or required body fields
+- Do not use values that violate enum, pattern, format, or min/max
+- Do not invent endpoints, statuses, or fields that are not in the spec
+- For 204 responses, expected_schema is null and body is null
+- Return a JSON array of TestCase objects only. No markdown.
+
+Input spec:
+- The user provides SPEC_FILE, a path to an ingested spec JSON file.
+- Do not use a hardcoded path. If SPEC_FILE is missing, ask the user for it.
+- The file is the POST /specs/ingest response (ApiSpec): title, base_url,
+  endpoints, schemas, and raw_spec.
+- Read SPEC_FILE fully, then generate tests from its endpoints and schemas.
+
+SPEC_FILE:
+{{SPEC_FILE}}
+
+SPEC_JSON:
+{{SPEC_JSON}}

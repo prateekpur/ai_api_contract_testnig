@@ -1,9 +1,10 @@
 fastapi
 uvicorn
+python-dotenv
 python-multipart
 pydantic
 httpx
 pyyaml
 openapi-core
-openai
+cursor-sdk
 pytest
