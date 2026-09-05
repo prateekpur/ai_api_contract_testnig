@@ -127,11 +127,16 @@ class SetupStep(BaseModel):
     save: dict[str, str] = Field(default_factory=dict)
 
 
-class Dependency(BaseModel):
-    """A prior test case whose response this test needs."""
+class VariableExtraction(BaseModel):
+    """Pull a value from a prior test response into a named variable."""
 
-    test_name: str
-    save: dict[str, str] = Field(default_factory=dict)
+    source_test: str
+    source_path: str
+    variable: str
+
+
+class Dependency(VariableExtraction):
+    """A prior test case this test needs, with a variable taken from its response."""
 
 
 class TestCase(BaseModel):

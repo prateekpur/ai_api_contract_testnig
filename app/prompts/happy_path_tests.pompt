@@ -24,20 +24,21 @@ For each endpoint, produce a TestCase with:
 - dependencies: other TestCases this test must run after.
   Empty list when no existing resource is needed (POST create, or
   GET collection with no required id).
-  Each dependency:
-    - test_name: name of a create test in this same list
+  Each dependency is a variable extraction:
+    - source_test: name of a create test in this same list
       (e.g. "createPet_happy_path")
-    - save: map placeholder -> response field, e.g. {"petId": "id"}
+    - source_path: JSONPath into that test's response (e.g. "$.id")
+    - variable: name used as "{{variable}}" (e.g. "petId")
 - test_data:
   - path_params: valid values for every path parameter. For values
-    from a dependency, use "{{name}}" (e.g. "{{petId}}")
+    from a dependency, use "{{variable}}" (e.g. "{{petId}}")
   - query_params: valid values for required query params; include
-    optional ones only if they have a default. Use "{{name}}" for
+    optional ones only if they have a default. Use "{{variable}}" for
     values from a dependency
   - headers/cookies: only if the spec requires them
   - body: a complete JSON object for requestBody, or null if none.
-    Use "{{name}}" for ids from a dependency. Use "{{petId}}" only
-    when a matching save exists on a dependency.
+    Use "{{variable}}" for ids from a dependency. Use "{{petId}}" only
+    when a matching variable extraction exists.
 
 How to pick valid values from the schema:
 - required fields: always include them
@@ -52,7 +53,7 @@ How to pick valid values from the schema:
 Dependency rules:
 - Prefer depending on POST create tests that return the resource id
 - Chain dependencies when needed (createPolicy depends on createCustomer)
-- A dependent test may use "{{name}}" from a dependency save
+- A dependent test may use "{{variable}}" from a dependency extraction
 - Do not invent test names, endpoints, or fields. Do not hardcode ids
   like 1 when a create test exists
 - GET collection with no path id may have empty dependencies

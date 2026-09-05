@@ -27,8 +27,9 @@ def test_parse_happy_path_tests_includes_dependencies() -> None:
             "expected_status": 200,
             "dependencies": [
               {
-                "test_name": "createPet_happy_path",
-                "save": {"petId": "id"}
+                "source_test": "createPet_happy_path",
+                "source_path": "$.id",
+                "variable": "petId"
               }
             ],
             "test_data": {
@@ -39,8 +40,9 @@ def test_parse_happy_path_tests_includes_dependencies() -> None:
         ]
         """
     )
-    assert cases[0].dependencies[0].test_name == "createPet_happy_path"
-    assert cases[0].dependencies[0].save == {"petId": "id"}
+    assert cases[0].dependencies[0].source_test == "createPet_happy_path"
+    assert cases[0].dependencies[0].source_path == "$.id"
+    assert cases[0].dependencies[0].variable == "petId"
     assert cases[0].test_data.path_params["petId"] == "{{petId}}"
 
 
