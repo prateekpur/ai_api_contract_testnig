@@ -4,21 +4,40 @@ Task: create HAPPY PATH tests only. One test per operation.
 A happy path is a valid request that should succeed. Do not generate
 negative, boundary, or invalid-input cases.
 
+Create requisite data through dependencies on other tests. Do not assume
+records already exist. If the operation needs an existing resource
+(GET/PUT/PATCH/DELETE by id, or a foreign key like customerId), depend
+on the create test for that resource. Use only test names you generate
+in this same list. Prefer dependencies over inline setup.
+
 For each endpoint, produce a TestCase with:
 - name: short, unique, e.g. "createPolicy_happy_path"
 - description: what valid behavior is being checked
-- endpoint_path, method, endpoint_id from the spec
+- endpoint_path, method from the spec
+- endpoint_id: the endpoint UUID `id` field only. Never use operationId
+  (getPets, createPet) as endpoint_id. If unsure, omit endpoint_id.
 - case_type: "happy_path"
 - expected_status: the lowest 2xx status declared for that operation
   (200, 201, or 204). If none, skip the endpoint.
 - expected_schema: the response schema for that success status
   (resolve $ref from components.schemas)
+- dependencies: other TestCases this test must run after.
+  Empty list when no existing resource is needed (POST create, or
+  GET collection with no required id).
+  Each dependency:
+    - test_name: name of a create test in this same list
+      (e.g. "createPet_happy_path")
+    - save: map placeholder -> response field, e.g. {"petId": "id"}
 - test_data:
-  - path_params: valid values for every path parameter
+  - path_params: valid values for every path parameter. For values
+    from a dependency, use "{{name}}" (e.g. "{{petId}}")
   - query_params: valid values for required query params; include
-    optional ones only if they have a default
+    optional ones only if they have a default. Use "{{name}}" for
+    values from a dependency
   - headers/cookies: only if the spec requires them
-  - body: a complete JSON object for requestBody, or null if none
+  - body: a complete JSON object for requestBody, or null if none.
+    Use "{{name}}" for ids from a dependency. Use "{{petId}}" only
+    when a matching save exists on a dependency.
 
 How to pick valid values from the schema:
 - required fields: always include them
@@ -30,6 +49,16 @@ How to pick valid values from the schema:
 - array: one valid item
 - object: all required properties; skip optional properties
 
+Dependency rules:
+- Prefer depending on POST create tests that return the resource id
+- Chain dependencies when needed (createPolicy depends on createCustomer)
+- A dependent test may use "{{name}}" from a dependency save
+- Do not invent test names, endpoints, or fields. Do not hardcode ids
+  like 1 when a create test exists
+- GET collection with no path id may have empty dependencies
+- DELETE/GET/PUT by id must list the create test in dependencies
+- Create tests keep dependencies as an empty list
+
 Rules:
 - Do not omit required path params or required body fields
 - Do not use values that violate enum, pattern, format, or min/max
@@ -38,10 +67,10 @@ Rules:
 - Return a JSON array of TestCase objects only. No markdown.
 
 Input spec:
-- The user provides SPEC_FILE, a path to an ingested spec JSON file.
+- The user provides SPEC_FILE, a path to OpenAPI YAML or ingested spec JSON.
 - Do not use a hardcoded path. If SPEC_FILE is missing, ask the user for it.
-- The file is the POST /specs/ingest response (ApiSpec): title, base_url,
-  endpoints, schemas, and raw_spec.
+- The loaded document is an ApiSpec: title, base_url, endpoints (each with
+  a UUID `id` and optional operation_id), schemas, and raw_spec.
 - Read SPEC_FILE fully, then generate tests from its endpoints and schemas.
 
 SPEC_FILE:

@@ -117,6 +117,23 @@ class TestData(BaseModel):
     body: Any = None
 
 
+class SetupStep(BaseModel):
+    """A request that creates data the main test needs."""
+
+    name: str | None = None
+    endpoint_path: str
+    method: HttpMethod
+    test_data: TestData
+    save: dict[str, str] = Field(default_factory=dict)
+
+
+class Dependency(BaseModel):
+    """A prior test case whose response this test needs."""
+
+    test_name: str
+    save: dict[str, str] = Field(default_factory=dict)
+
+
 class TestCase(BaseModel):
     """A generated or authored contract test for one endpoint."""
 
@@ -127,6 +144,8 @@ class TestCase(BaseModel):
     endpoint_path: str
     method: HttpMethod
     test_data: TestData
+    setup: list[SetupStep] = Field(default_factory=list)
+    dependencies: list[Dependency] = Field(default_factory=list)
     expected_status: int = 200
     expected_schema: SchemaDefinition | None = None
     case_type: TestCaseType = TestCaseType.HAPPY_PATH
