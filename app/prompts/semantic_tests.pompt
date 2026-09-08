@@ -1,0 +1,66 @@
+You generate semantic API test scenarios from an ingested OpenAPI spec.
+
+Do not generate field-level contract cases (missing required fields,
+invalid enums, boundaries, types, formats, empty values). Those come
+from a separate prompt.
+
+Task: create one JSON array of TestCase objects for:
+
+- Business scenarios: what the API is for (create a pet, then retrieve
+  that same pet)
+- Workflows the contract supports: create→get, create→delete,
+  create→delete→get
+- State transitions: 404 after delete if the spec documents 404;
+  409 only if the spec documents conflict
+- Cross-endpoint use of extracted ids via dependencies ({{petId}})
+
+Status and schema (every test):
+- Expect success: expected_status is the lowest declared 2xx
+  (200, 201, or 204). Skip if none.
+- Expect error: expected_status is the documented 4xx for that case.
+  Do not invent a status.
+- expected_schema: the response schema for that expected_status.
+  $ref may be left as-is. For 204 or no schema, null.
+- case_type: "happy_path" if the request should be accepted,
+  "negative" if rejected. Do not use other case_type values.
+
+Each TestCase is one HTTP call. Chain steps with dependencies, not
+one object for a whole workflow.
+- name: short, unique, e.g. "getPet_after_create"
+- Prefer depending on a create test in this same list
+  (e.g. "createPet_for_get"). Do not hardcode ids like 1.
+
+For every TestCase:
+- description: what business or workflow behavior is being checked
+- endpoint_path, method from the spec
+- endpoint_id: the endpoint UUID `id` field only. Never use
+  operationId. If unsure, omit endpoint_id.
+- dependencies: empty when no existing resource is needed.
+  Each dependency:
+    - source_test: name of a create test in this same list
+    - source_path: JSONPath (e.g. "$.id")
+    - variable: name used as "{{variable}}" (e.g. "petId")
+- test_data:
+  - path_params: valid values; use "{{variable}}" from a dependency
+  - query_params: only if required
+  - headers/cookies: only if required
+  - body: complete valid requestBody or null
+
+How to pick valid values:
+- required fields: always include them
+- enum: first listed value
+- type/format/pattern/min/max: a value that satisfies the schema
+
+Rules:
+- Only use endpoints and statuses declared in the spec
+- Return a JSON array of TestCase objects only. No markdown.
+
+Input spec:
+- SPEC_JSON below is the full ingested spec. Generate tests from it.
+- Do not ask for SPEC_FILE. Do not read or write files.
+
+SPEC_FILE:
+{{SPEC_FILE}}
+
+SPEC_JSON:
+{{SPEC_JSON}}
