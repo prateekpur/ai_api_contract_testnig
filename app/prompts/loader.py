@@ -6,7 +6,8 @@ from pathlib import Path
 from app.schemas.schemas import ApiSpec
 from app.services.openapi_ingest import ingest_openapi_file, resolve_spec_path
 
-PROMPT_PATH = Path(__file__).with_name("happy_path_tests.pompt")
+PROMPTS_DIR = Path(__file__).parent
+CONTRACT_PROMPT = PROMPTS_DIR / "contract_tests.pompt"
 _YAML_SUFFIXES = {".yaml", ".yml"}
 
 
@@ -20,11 +21,15 @@ def load_api_spec(spec_file: str | Path) -> tuple[Path, ApiSpec]:
     return spec_path, ApiSpec.model_validate(raw)
 
 
-def load_happy_path_prompt(spec_file: str | Path) -> str:
-    """Build the happy-path prompt from a user-supplied YAML or ingest JSON file."""
+def load_prompt(spec_file: str | Path, prompt_path: Path) -> str:
     spec_path, spec = load_api_spec(spec_file)
-    template = PROMPT_PATH.read_text()
+    template = prompt_path.read_text()
     return template.replace("{{SPEC_FILE}}", str(spec_path)).replace(
         "{{SPEC_JSON}}",
         spec.model_dump_json(indent=2, by_alias=True),
     )
+
+
+def load_contract_prompt(spec_file: str | Path) -> str:
+    """Build the contract-test prompt from a user-supplied YAML or ingest JSON file."""
+    return load_prompt(spec_file, CONTRACT_PROMPT)

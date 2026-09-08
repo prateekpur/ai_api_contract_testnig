@@ -38,12 +38,13 @@ def test_cli_generate_requires_spec_file() -> None:
 def test_cli_generate_scenarios(monkeypatch) -> None:
     case = _sample_case()
     monkeypatch.setattr(
-        "app.cli.execute_happy_path_prompt",
+        "app.cli.generate_all_tests",
         lambda spec_file: [case] if spec_file == "fixtures/petstore.ingest.json" else [],
     )
     stdout = StringIO()
     main(stdin=StringIO("1\nfixtures/petstore.ingest.json\n4\n"), stdout=stdout)
     output = stdout.getvalue()
+    assert "Generate all tests" in output
     assert "getPets_happy_path" in output
     assert "Exiting." in output
 
@@ -56,7 +57,7 @@ def test_cli_export_requires_generated_scenarios() -> None:
 
 def test_cli_export_writes_file(monkeypatch) -> None:
     case = _sample_case()
-    monkeypatch.setattr("app.cli.execute_happy_path_prompt", lambda spec_file: [case])
+    monkeypatch.setattr("app.cli.generate_all_tests", lambda spec_file: [case])
     dest = PROJECT_ROOT / EXPORT_PATH
     dest.unlink(missing_ok=True)
     stdout = StringIO()

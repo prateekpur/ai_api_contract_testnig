@@ -6,14 +6,14 @@ import sys
 from app.env import load_env
 from app.schemas.schemas import TestCase, TestResult
 from app.services.export import export_test_cases
-from app.services.happy_path_tests import execute_happy_path_prompt
+from app.services.happy_path_tests import generate_all_tests
 from app.services.runner import execute_workflow, load_test_cases
 
 DEFAULT_EXPORT_PATH = "exports/happy_path_tests.json"
 
 MENU = """
 AI API Contract Testing
-1. Generate contract-based scenarios
+1. Generate all tests
 2. Export scenarios
 3. Run scenarios
 4. Exit
@@ -54,8 +54,10 @@ def _generate_scenarios(stdin, stdout) -> list[TestCase] | None:
     if not spec_file:
         stdout.write("SPEC_FILE is required.\n")
         return None
+    stdout.write("Generating contract tests...\n")
+    stdout.flush()
     try:
-        cases = execute_happy_path_prompt(spec_file)
+        cases = generate_all_tests(spec_file)
     except (FileNotFoundError, ValueError, OSError) as exc:
         stdout.write(f"Error: {exc}\n")
         return None
