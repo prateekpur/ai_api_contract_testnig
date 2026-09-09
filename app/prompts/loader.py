@@ -8,6 +8,7 @@ from app.services.openapi_ingest import ingest_openapi_file, resolve_spec_path
 
 PROMPTS_DIR = Path(__file__).parent
 CONTRACT_PROMPT = PROMPTS_DIR / "contract_tests.pompt"
+SEMANTIC_PROMPT = PROMPTS_DIR / "semantic_tests.pompt"
 _YAML_SUFFIXES = {".yaml", ".yml"}
 
 
@@ -33,3 +34,8 @@ def load_prompt(spec_file: str | Path, prompt_path: Path) -> str:
 def load_contract_prompt(spec_file: str | Path) -> str:
     """Build the contract-test prompt from a user-supplied YAML or ingest JSON file."""
     return load_prompt(spec_file, CONTRACT_PROMPT)
+
+
+def load_semantic_prompt(spec_file: str | Path) -> str:
+    """Build the semantic-test prompt from a user-supplied YAML or ingest JSON file."""
+    return load_prompt(spec_file, SEMANTIC_PROMPT)

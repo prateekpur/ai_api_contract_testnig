@@ -5,6 +5,7 @@ from app.cli import DEFAULT_EXPORT_PATH, main
 from app.schemas.schemas import HttpMethod, TestCase, TestCaseType, TestData, TestResult, TestStatus
 from app.services.export import export_test_cases
 from app.services.openapi_ingest import PROJECT_ROOT
+from app.services.pipeline import GenerationResult
 
 EXPORT_PATH = "exports/cli_test_output.json"
 
@@ -38,15 +39,36 @@ def test_cli_generate_requires_spec_file() -> None:
 def test_cli_generate_scenarios(monkeypatch) -> None:
     case = _sample_case()
     monkeypatch.setattr(
-        "app.cli.generate_all_tests",
-        lambda spec_file: [case] if spec_file == "fixtures/petstore.ingest.json" else [],
+        "app.cli.generate_pipeline",
+        lambda spec_file: GenerationResult(cases=[case], contract_count=1, semantic_count=0)
+        if spec_file == "fixtures/petstore.ingest.json"
+        else GenerationResult(cases=[], contract_count=0, semantic_count=0),
     )
     stdout = StringIO()
     main(stdin=StringIO("1\nfixtures/petstore.ingest.json\n4\n"), stdout=stdout)
     output = stdout.getvalue()
     assert "Generate all tests" in output
+    assert "Contract: 1, semantic: 0, kept: 1, dropped: 0" in output
     assert "getPets_happy_path" in output
     assert "Exiting." in output
+
+
+def test_cli_generate_prints_dropped_reasons(monkeypatch) -> None:
+    case = _sample_case()
+    monkeypatch.setattr(
+        "app.cli.generate_pipeline",
+        lambda spec_file: GenerationResult(
+            cases=[case],
+            contract_count=2,
+            semantic_count=1,
+            dropped=["createPet_missing_name_dup: duplicate of an earlier scenario"],
+        ),
+    )
+    stdout = StringIO()
+    main(stdin=StringIO("1\nfixtures/petstore.ingest.json\n4\n"), stdout=stdout)
+    output = stdout.getvalue()
+    assert "Contract: 2, semantic: 1, kept: 1, dropped: 1" in output
+    assert "Dropped createPet_missing_name_dup: duplicate of an earlier scenario" in output
 
 
 def test_cli_export_requires_generated_scenarios() -> None:
@@ -57,7 +79,10 @@ def test_cli_export_requires_generated_scenarios() -> None:
 
 def test_cli_export_writes_file(monkeypatch) -> None:
     case = _sample_case()
-    monkeypatch.setattr("app.cli.generate_all_tests", lambda spec_file: [case])
+    monkeypatch.setattr(
+        "app.cli.generate_pipeline",
+        lambda spec_file: GenerationResult(cases=[case], contract_count=1, semantic_count=0),
+    )
     dest = PROJECT_ROOT / EXPORT_PATH
     dest.unlink(missing_ok=True)
     stdout = StringIO()

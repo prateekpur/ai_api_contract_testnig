@@ -10,9 +10,10 @@ from cursor_sdk import Agent, AgentOptions, CursorAgentError, LocalAgentOptions
 from pydantic import TypeAdapter, ValidationError
 
 from app.env import load_env
-from app.prompts.loader import load_api_spec, load_contract_prompt
+from app.prompts.loader import load_api_spec, load_contract_prompt, load_semantic_prompt
 from app.schemas.schemas import ApiSpec, SchemaDefinition, TestCase
 from app.services.openapi_ingest import PROJECT_ROOT
+from app.services.pipeline import GenerationResult, finalize_cases
 
 _TEST_CASES = TypeAdapter(list[TestCase])
 _FENCE_BLOCK = re.compile(r"```(?:json)?\s*(.*?)\s*```", re.IGNORECASE | re.DOTALL)
@@ -23,8 +24,22 @@ def generate_all_tests(
     *,
     model: str | None = None,
 ) -> list[TestCase]:
-    """Run the contract-test prompt and return the TestCase list."""
-    return _execute_prompt(spec_file, load_contract_prompt, model=model, label="contract-tests")
+    """Run contract and semantic prompts, then merge, dedupe, and validate."""
+    return generate_pipeline(spec_file, model=model).cases
+
+
+def generate_pipeline(
+    spec_file: str | Path,
+    *,
+    model: str | None = None,
+) -> GenerationResult:
+    """Run both generation tracks and return cases plus drop counts."""
+    if not spec_file:
+        raise ValueError("SPEC_FILE is required")
+    _, spec = load_api_spec(spec_file)
+    contract = _execute_prompt(spec_file, load_contract_prompt, model=model, label="contract-tests")
+    semantic = _execute_prompt(spec_file, load_semantic_prompt, model=model, label="semantic-tests")
+    return finalize_cases(contract, semantic, spec)
 
 
 def _execute_prompt(

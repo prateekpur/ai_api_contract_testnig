@@ -6,7 +6,7 @@ import sys
 from app.env import load_env
 from app.schemas.schemas import TestCase, TestResult
 from app.services.export import export_test_cases
-from app.services.happy_path_tests import generate_all_tests
+from app.services.happy_path_tests import generate_pipeline
 from app.services.runner import execute_workflow, load_test_cases
 
 DEFAULT_EXPORT_PATH = "exports/happy_path_tests.json"
@@ -54,15 +54,21 @@ def _generate_scenarios(stdin, stdout) -> list[TestCase] | None:
     if not spec_file:
         stdout.write("SPEC_FILE is required.\n")
         return None
-    stdout.write("Generating contract tests...\n")
+    stdout.write("Generating contract and semantic tests...\n")
     stdout.flush()
     try:
-        cases = generate_all_tests(spec_file)
+        result = generate_pipeline(spec_file)
     except (FileNotFoundError, ValueError, OSError) as exc:
         stdout.write(f"Error: {exc}\n")
         return None
-    stdout.write(_format_cases(cases) + "\n")
-    return cases
+    stdout.write(
+        f"Contract: {result.contract_count}, semantic: {result.semantic_count}, "
+        f"kept: {result.kept_count}, dropped: {len(result.dropped)}\n"
+    )
+    for reason in result.dropped:
+        stdout.write(f"Dropped {reason}\n")
+    stdout.write(_format_cases(result.cases) + "\n")
+    return result.cases
 
 
 def _export_scenarios(stdin, stdout, cases: list[TestCase]) -> None:
