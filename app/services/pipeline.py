@@ -8,6 +8,7 @@ from app.schemas.schemas import ApiSpec, TestCase
 
 _PLACEHOLDER = re.compile(r"\{\{(\w+)\}\}")
 _PATH_PARAM = re.compile(r"\{(\w+)\}")
+_MAP_FIELDS = ("path_params", "query_params", "headers", "cookies")
 
 
 @dataclass
@@ -27,28 +28,34 @@ def merge_cases(contract: list[TestCase], semantic: list[TestCase]) -> list[Test
 
 
 def case_fingerprint(case: TestCase) -> tuple:
-    data = case.test_data.model_dump(mode="json")
     return (
         case.method.value,
         case.endpoint_path,
         case.expected_status,
         case.case_type.value,
-        json.dumps(data, sort_keys=True, default=str),
+        _canonical_test_data(case),
     )
 
 
 def dedupe_cases(cases: list[TestCase]) -> tuple[list[TestCase], list[str]]:
-    seen: set[tuple] = set()
-    kept: list[TestCase] = []
-    dropped: list[str] = []
-    for case in cases:
-        key = case_fingerprint(case)
-        if key in seen:
-            dropped.append(f"{case.name}: duplicate of an earlier scenario")
-            continue
-        seen.add(key)
-        kept.append(case)
+    kept, dropped, _aliases = _dedupe_cases(cases)
     return kept, dropped
+
+
+def remap_dependencies(cases: list[TestCase], aliases: dict[str, str]) -> list[TestCase]:
+    if not aliases:
+        return cases
+    remapped: list[TestCase] = []
+    for case in cases:
+        if not case.dependencies:
+            remapped.append(case)
+            continue
+        deps = [
+            dep.model_copy(update={"source_test": _resolve_alias(dep.source_test, aliases)})
+            for dep in case.dependencies
+        ]
+        remapped.append(case.model_copy(update={"dependencies": deps}))
+    return remapped
 
 
 def validate_cases(cases: list[TestCase], spec: ApiSpec) -> tuple[list[TestCase], list[str]]:
@@ -84,7 +91,8 @@ def finalize_cases(
     spec: ApiSpec,
 ) -> GenerationResult:
     merged = merge_cases(contract, semantic)
-    unique, dupes = dedupe_cases(merged)
+    unique, dupes, aliases = _dedupe_cases(merged)
+    unique = remap_dependencies(unique, aliases)
     kept, invalid = validate_cases(unique, spec)
     return GenerationResult(
         cases=kept,
@@ -92,6 +100,56 @@ def finalize_cases(
         semantic_count=len(semantic),
         dropped=dupes + invalid,
     )
+
+
+def _dedupe_cases(cases: list[TestCase]) -> tuple[list[TestCase], list[str], dict[str, str]]:
+    seen: dict[tuple, str] = {}
+    kept: list[TestCase] = []
+    dropped: list[str] = []
+    aliases: dict[str, str] = {}
+    for case in cases:
+        key = case_fingerprint(case)
+        if key in seen:
+            aliases[case.name] = seen[key]
+            dropped.append(f"{case.name}: duplicate of an earlier scenario")
+            continue
+        seen[key] = case.name
+        kept.append(case)
+    return kept, dropped, aliases
+
+
+def _canonical_test_data(case: TestCase) -> str:
+    data = case.test_data.model_dump(mode="json")
+    canonical: dict[str, object] = {}
+    for field in _MAP_FIELDS:
+        value = data.get(field) or {}
+        if value:
+            canonical[field] = _canonicalize_value(value)
+    body = data.get("body")
+    if body is not None:
+        canonical["body"] = _canonicalize_value(body)
+    return json.dumps(canonical, sort_keys=True, default=str)
+
+
+def _canonicalize_value(value: object, field_key: str | None = None) -> object:
+    if isinstance(value, str):
+        if field_key and _PLACEHOLDER.search(value):
+            return _PLACEHOLDER.sub(f"{{{{{field_key}}}}}", value)
+        return value
+    if isinstance(value, dict):
+        return {key: _canonicalize_value(item, key) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_canonicalize_value(item, field_key) for item in value]
+    return value
+
+
+def _resolve_alias(name: str, aliases: dict[str, str]) -> str:
+    seen: set[str] = set()
+    current = name
+    while current in aliases and current not in seen:
+        seen.add(current)
+        current = aliases[current]
+    return current
 
 
 def _structural_error(
