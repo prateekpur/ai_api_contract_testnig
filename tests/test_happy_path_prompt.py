@@ -2,7 +2,7 @@ from uuid import uuid4
 
 import pytest
 
-from app.prompts.loader import load_api_spec, load_contract_prompt
+from app.prompts.loader import load_api_spec, load_contract_prompt, load_semantic_prompt
 from app.schemas.schemas import HttpMethod, TestCaseType
 from app.services.happy_path_tests import generate_all_tests, parse_happy_path_tests
 
@@ -126,6 +126,14 @@ def test_load_contract_prompt_accepts_yaml() -> None:
     prompt = load_contract_prompt("sample_specs/petstore.yaml")
     assert "Simple Pet Store API" in prompt
     assert "getPets" in prompt
+
+
+def test_load_semantic_prompt_uses_user_file() -> None:
+    prompt = load_semantic_prompt("fixtures/petstore.ingest.json")
+    assert "semantic" in prompt.lower()
+    assert "workflow" in prompt.lower()
+    assert "Simple Pet Store API" in prompt
+    assert "{{SPEC_JSON}}" not in prompt
 
 
 def test_parse_expands_schema_refs() -> None:
