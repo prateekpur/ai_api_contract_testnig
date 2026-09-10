@@ -45,7 +45,8 @@ Generate before export in the same session. Run can load an existing export file
 ```
 OpenAPI ingest
   → contract_tests.pompt
-  → semantic_tests.pompt
+  → semantic_tests.pompt (generic workflows)
+  → bind steps onto the spec
   → parse / expand $ref
   → merge
   → fingerprint dedupe
@@ -55,7 +56,7 @@ OpenAPI ingest
 
 **Contract track** (`app/prompts/contract_tests.pompt`) does not invent statuses. Success uses the lowest declared 2xx; errors use a documented 4xx.
 
-**Semantic track** (`app/prompts/semantic_tests.pompt`) does not re-list field-level contract cases. It uses existing `case_type` values (`happy_path` / `negative`).
+**Semantic track** (`app/prompts/semantic_tests.pompt`) emits generic workflows (`POST /resources`, `GET /resources/{resourceId}`, `case_type: semantic`), not Petstore-specific TestCases. The app binds those steps onto the spec (names, paths, bodies, statuses) before merge.
 
 **Dedupe** keeps the first case with the same `(method, path, expected_status, case_type, canonical test_data)`. Contract wins when both tracks invent the same request.
 
@@ -135,13 +136,14 @@ app/
   cli.py                         Generate, export, and run menu
   main.py                        FastAPI app
   prompts/contract_tests.pompt   Field-level contract prompt
-  prompts/semantic_tests.pompt   Workflow / business-scenario prompt
+  prompts/semantic_tests.pompt   Generic workflow prompt (create then get, …)
   prompts/loader.py              Inject spec JSON into prompts
   routers/specs.py               Ingest and discovery routes
   routers/tests.py               Test generation route
   schemas/schemas.py             ApiSpec, Endpoint, TestCase, TestResult
   services/openapi_ingest.py     YAML → ApiSpec parser
-  services/happy_path_tests.py   Run both tracks and parse TestCase JSON
+  services/happy_path_tests.py   Run both tracks and parse JSON
+  services/semantic_workflows.py Bind generic steps onto spec endpoints
   services/pipeline.py           Merge, fingerprint dedupe, self-validation
   services/export.py             Write scenarios to JSON
   services/runner.py             Execute chained tests against a live API

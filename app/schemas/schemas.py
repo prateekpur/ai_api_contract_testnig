@@ -139,6 +139,32 @@ class Dependency(VariableExtraction):
     """A prior test case this test needs, with a variable taken from its response."""
 
 
+class SemanticStep(BaseModel):
+    """One generic HTTP operation in a reusable semantic workflow."""
+
+    operation: str
+    expected_status: int | None = None
+
+
+class SemanticDependency(BaseModel):
+    """Pull a value from an earlier workflow step into a named variable."""
+
+    type: str = "DATA_DEPENDENCY"
+    source_path: str
+    variable: str
+    source_step: int | None = None
+
+
+class SemanticWorkflow(BaseModel):
+    """Spec-agnostic workflow that the app renders into TestCase steps."""
+
+    name: str
+    case_type: str = "semantic"
+    description: str | None = None
+    steps: list[SemanticStep]
+    dependencies: list[SemanticDependency] = Field(default_factory=list)
+
+
 class TestCase(BaseModel):
     """A generated or authored contract test for one endpoint."""
 
