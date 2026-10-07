@@ -8,34 +8,51 @@ Status and schema (every test):
   (200, 201, or 204). Skip if none.
 - Expect error: expected_status is the documented 4xx for that case
   (validation, 404, 409, …). Do not invent a status. Skip if none
-  is declared.
-- expected_schema: the response schema for that expected_status.
-  $ref may be left as-is. For 204 or no schema, null.
+  is declared. A schema violation does not prove the server returns
+  that status; set determinism to "inferred" for those cases.
+- expected_schema_ref: component schema name (e.g. "Event") when the
+  response uses a $ref. expected_schema may be the $ref only.
 - case_type: "happy_path" if the request should be accepted,
   "negative" if rejected, "boundary" for in/out-of-range constraint
   tests.
+- test_source: "contract"
+- determinism: "deterministic" only when the contract directly
+  supports the expected status. Use "inferred" for schema-violation
+  → 4xx guesses, "conditional" for security/business rules, "unknown"
+  if there is not enough information.
+- happy_path_contract_valid: true only if the request satisfies every
+  declared constraint. Never set a happy_path or 2xx test that fails
+  this check (no startDate "ab" when format is date-time).
+- mutated_field / constraint: set on enum, required-omit, and
+  boundary tests (e.g. field "capacity", constraint "MAX+1").
 
 1. Happy path
 A valid request that should succeed. One test per operation.
 Do not generate extra happy-path cases.
 - name: e.g. "createPet_happy_path"
 - Expect success
-- test_data.body: complete requestBody or null. Include every
-  required field. Use valid types, enums, and ranges.
+- Include every required field. Use valid types, enums, min/max,
+  minLength/maxLength, patterns, and formats (date-time, email).
+  Respect nullable. Path/query/header values must be valid.
+- Do not invent "at least one field" on a PUT/PATCH whose schema
+  has no required properties. {} is valid if the contract says so.
 
 2. Required field
-Omit one required body or query field. The API should reject it.
-One test per omitted field. Skip endpoints with no required body
-or query fields. Do not omit path parameters here.
+Omit one required body or query field. Never classify this as
+happy_path. One test per omitted field. Also emit omit-entire-body
+when the operation has a requestBody. Skip endpoints with no
+required body or query fields. Do not omit path parameters here.
 - name: e.g. "createPet_missing_name"
-- Expect error
+- Expect error, determinism inferred
+- mutated_field: the omitted field
 - test_data.body: every required property except the omitted field.
 
 3. Enum field
 Invalid enum on a body or query field. One test per enum field.
-Skip endpoints with no request enums.
+The invalid value must not be a declared enum. Skip endpoints
+with no request enums.
 - name: e.g. "createPet_invalid_species"
-- Expect error
+- Expect error, determinism inferred
 - test_data.body: valid except the enum under test, which must NOT
   be in the list (e.g. "FISH" when the enum is DOG, CAT, BIRD).
 
@@ -44,17 +61,18 @@ One test per valid enum value on a body or query field.
 Skip endpoints with no request enums.
 - name: e.g. "createPet_species_DOG"
 - Expect success
+- mutated_field: the enum field, constraint: the enum value
 
 5. BoundaryValue field
-For every numeric or string field with boundary constraints:
-- minimum: at minimum, and just below
-- maximum: at maximum, and just above
-- exclusiveMinimum: just above minimum, and at minimum
-- exclusiveMaximum: just below maximum, and at maximum
-- minLength / maxLength: at the limit, and just outside
-One test per meaningful boundary. Skip fields with no boundary.
+Only where a constraint exists. Prove the value is that boundary.
+Numeric: MIN-1, MIN, MIN+1, MAX-1, MAX, MAX+1.
+String length: MIN_LENGTH-1, MIN_LENGTH, MIN_LENGTH+1,
+MAX_LENGTH-1, MAX_LENGTH, MAX_LENGTH+1.
+Skip unconstrained fields. Do not collapse MAX-1 / MAX / MAX+1.
 - name: e.g. "createPet_age_below_minimum"
+- constraint: "MIN-1" / "MIN" / "MAX+1" / "MAX_LENGTH" etc.
 - Expect success for in-range values, error for violations
+  (violations are inferred, not deterministic)
 
 6. Pattern field
 For every request field with a regex pattern: one matching value
@@ -76,7 +94,8 @@ Keep required fields valid. Do not test required fields here.
 - Expect success
 
 9. NullValue field
-If the contract allows null: send null and expect success.
+Nullable is not the same as optional. If a property is nullable:
+omit it, send null, send a valid value, and an invalid type.
 If the contract prohibits null: send null and expect error.
 Do not assume nullable unless the contract says so.
 - name: e.g. "createPet_null_name"
@@ -161,17 +180,19 @@ For every TestCase:
 
 How to pick valid values:
 - type/format: integer, number, string, boolean, date, date-time,
-  email, uuid
-- enum (when the field must be valid): use the first listed value
+  email, uuid. date-time must be RFC3339 (not "ab").
+- enum (when the field must be valid): use a listed value
 - pattern: a string that matches (e.g. POL-00000001 for ^POL-[0-9]{8}$)
-- minimum/maximum, minLength/maxLength: a value strictly inside
-  the range
+- minimum/maximum, minLength/maxLength: a value that satisfies
+  the constraint (inside the range unless this is a boundary test)
 - $ref: expand and fill the referenced schema
 - array: one valid item
 - object: required properties only unless this is an omit-field test
 
 Rules:
 - Do not invent endpoints, statuses, or fields that are not in the spec
+- Do not emit SQL injection, XSS, IDOR, auth bypass, or rate-limit
+  cases as contract tests. Those are security_inference / conditional.
 - Do not hardcode ids like 1 when a create test exists
 - Return a JSON array of TestCase objects only. No markdown.
 

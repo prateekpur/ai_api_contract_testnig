@@ -34,7 +34,7 @@ def generate_pipeline(
     *,
     model: str | None = None,
 ) -> GenerationResult:
-    """Run both generation tracks and return cases plus drop counts."""
+    """Generate both tracks, then run validation before returning the suite."""
     if not spec_file:
         raise ValueError("SPEC_FILE is required")
     _, spec = load_api_spec(spec_file)

@@ -67,6 +67,8 @@ def _generate_scenarios(stdin, stdout) -> list[TestCase] | None:
     )
     for reason in result.dropped:
         stdout.write(f"Dropped {reason}\n")
+    for issue in result.validation_warnings:
+        stdout.write(f"Warning {issue.test_name}: {issue.message}\n")
     stdout.write(_format_cases(result.cases) + "\n")
     return result.cases
 

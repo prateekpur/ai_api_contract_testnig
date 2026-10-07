@@ -51,6 +51,7 @@ OpenAPI ingest
   → merge
   → fingerprint dedupe
   → self-validation
+  → contract consistency / quality gate
   → final TestCase list
 ```
 
@@ -59,6 +60,8 @@ OpenAPI ingest
 **Semantic track** (`app/prompts/semantic_tests.pompt`) emits generic workflows (`POST /resources`, `GET /resources/{resourceId}`, `case_type: semantic`), not Petstore-specific TestCases. The app binds those steps onto the spec (names, paths, bodies, statuses) before merge.
 
 **Dedupe** keeps the first case with the same `(method, path, expected_status, case_type, canonical test_data)`. Contract wins when both tracks invent the same request.
+
+**Quality gate** (no extra model call) then checks every request against the contract. A happy-path or 2xx test whose body/params violate type, enum, format, pattern, or bounds is dropped. Schema-violation → 4xx cases are kept as `determinism: inferred`, not as proven contract behavior.
 
 **Self-validation** (no extra model call) drops a case when:
 

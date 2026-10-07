@@ -32,6 +32,19 @@ class TestCaseType(str, Enum):
     SCHEMA = "schema"
 
 
+class Determinism(str, Enum):
+    DETERMINISTIC = "deterministic"
+    INFERRED = "inferred"
+    CONDITIONAL = "conditional"
+    UNKNOWN = "unknown"
+
+
+class TestSource(str, Enum):
+    CONTRACT = "contract"
+    SEMANTIC_INFERENCE = "semantic_inference"
+    SECURITY_INFERENCE = "security_inference"
+
+
 class TestStatus(str, Enum):
     PASSED = "passed"
     FAILED = "failed"
@@ -179,7 +192,14 @@ class TestCase(BaseModel):
     dependencies: list[Dependency] = Field(default_factory=list)
     expected_status: int = 200
     expected_schema: SchemaDefinition | None = None
+    expected_schema_ref: str | None = None
     case_type: TestCaseType = TestCaseType.HAPPY_PATH
+    determinism: Determinism = Determinism.UNKNOWN
+    test_source: TestSource = TestSource.CONTRACT
+    happy_path_contract_valid: bool | None = None
+    mutated_field: str | None = None
+    constraint: str | None = None
+    classification_reason: str | None = None
 
 
 class TestResult(BaseModel):

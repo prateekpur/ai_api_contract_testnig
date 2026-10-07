@@ -1,5 +1,5 @@
 from app.prompts.loader import load_api_spec
-from app.schemas.schemas import HttpMethod, TestCaseType
+from app.schemas.schemas import Determinism, HttpMethod, TestCaseType, TestSource
 from app.services.happy_path_tests import parse_semantic_tests
 from app.services.semantic_workflows import parse_semantic_workflows, render_semantic_workflows
 
@@ -102,6 +102,8 @@ def test_render_create_then_retrieve_uses_petstore_names() -> None:
     assert create.expected_status == 201
     assert create.test_data.body == {"name": "ab", "species": "DOG"}
     assert create.case_type == TestCaseType.HAPPY_PATH
+    assert create.test_source == TestSource.SEMANTIC_INFERENCE
+    assert create.determinism == Determinism.INFERRED
     assert retrieve.method == HttpMethod.GET
     assert retrieve.endpoint_path == "/pets/{petId}"
     assert retrieve.test_data.path_params == {"petId": "{{resourceId}}"}

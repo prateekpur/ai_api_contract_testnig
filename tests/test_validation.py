@@ -1,5 +1,6 @@
-from app.schemas.schemas import SchemaDefinition
-from app.services.validation import validate_response
+from app.schemas.schemas import HttpMethod, SchemaDefinition, TestData
+from app.prompts.loader import load_api_spec
+from app.services.validation import validate_request, validate_response
 
 
 def pet_schema() -> SchemaDefinition:
@@ -58,3 +59,38 @@ def test_species_enum() -> None:
         pet_schema(),
     )
     assert any("should be one of" in error and "DOG" in error for error in errors)
+
+
+def test_request_rejects_invalid_date_time() -> None:
+    _, spec = load_api_spec("sample_specs/arbitary_api.yaml")
+    endpoint = next(
+        item for item in spec.endpoints if item.path == "/events" and item.method == HttpMethod.POST
+    )
+    errors = validate_request(
+        endpoint,
+        TestData(
+            body={
+                "name": "Summit",
+                "category": "CONFERENCE",
+                "startDate": "ab",
+                "capacity": 10,
+            }
+        ),
+        spec.schemas,
+    )
+    assert any("date-time" in error for error in errors)
+
+
+def test_request_accepts_empty_update_object() -> None:
+    _, spec = load_api_spec("sample_specs/arbitary_api.yaml")
+    endpoint = next(
+        item
+        for item in spec.endpoints
+        if item.path == "/events/{eventId}" and item.method == HttpMethod.PUT
+    )
+    errors = validate_request(
+        endpoint,
+        TestData(path_params={"eventId": "{{eventId}}"}, body={}),
+        spec.schemas,
+    )
+    assert errors == []

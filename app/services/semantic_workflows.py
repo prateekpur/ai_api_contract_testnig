@@ -7,6 +7,7 @@ from pydantic import TypeAdapter, ValidationError
 from app.schemas.schemas import (
     ApiSpec,
     Dependency,
+    Determinism,
     Endpoint,
     HttpMethod,
     SchemaDefinition,
@@ -14,6 +15,7 @@ from app.schemas.schemas import (
     TestCase,
     TestCaseType,
     TestData,
+    TestSource,
 )
 
 _WORKFLOWS = TypeAdapter(list[SemanticWorkflow])
@@ -140,6 +142,8 @@ def _cases_for_binding(
                 expected_status=status,
                 expected_schema=schema,
                 case_type=TestCaseType.HAPPY_PATH if 200 <= status < 300 else TestCaseType.NEGATIVE,
+                test_source=TestSource.SEMANTIC_INFERENCE,
+                determinism=Determinism.INFERRED,
             )
         )
     return cases
@@ -233,8 +237,14 @@ def _valid_value(schema: SchemaDefinition | None, schemas: dict[str, SchemaDefin
         properties = schema.properties or {}
         return {key: _valid_value(properties.get(key), schemas) for key in schema.required}
     min_length = schema.min_length or 0
+    if schema.format == "date-time":
+        return "2026-11-01T10:00:00Z"
+    if schema.format == "date":
+        return "2026-11-01"
     if schema.format == "email":
         return "user@example.com"
+    if schema.format == "uuid":
+        return "00000000-0000-4000-8000-000000000001"
     if min_length <= 2:
         return "ab"
     return "a" * min_length

@@ -1,0 +1,384 @@
+openapi: 3.0.3
+
+info:
+  title: Event Management API
+  description: API for managing events and attendees
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api
+
+paths:
+
+  /events:
+    get:
+      summary: List events
+      operationId: listEvents
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - UPCOMING
+              - ACTIVE
+              - COMPLETED
+
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+
+      responses:
+        "200":
+          description: Events retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+
+        "400":
+          description: Invalid query parameters
+
+    post:
+      summary: Create an event
+      operationId: createEvent
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEventRequest"
+
+      responses:
+        "201":
+          description: Event created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+
+        "400":
+          description: Invalid event data
+
+        "409":
+          description: Event already exists
+
+
+  /events/{eventId}:
+
+    get:
+      summary: Get event details
+      operationId: getEvent
+
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^EVT-[0-9]{6}$"
+
+      responses:
+        "200":
+          description: Event found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+
+        "404":
+          description: Event not found
+
+    put:
+      summary: Update an event
+      operationId: updateEvent
+
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^EVT-[0-9]{6}$"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEventRequest"
+
+      responses:
+        "200":
+          description: Event updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Event"
+
+        "400":
+          description: Invalid event data
+
+        "404":
+          description: Event not found
+
+
+  /events/{eventId}/attendees:
+
+    post:
+      summary: Register attendee
+      operationId: registerAttendee
+
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^EVT-[0-9]{6}$"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttendeeRequest"
+
+      responses:
+        "201":
+          description: Attendee registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Attendee"
+
+        "400":
+          description: Invalid attendee information
+
+        "404":
+          description: Event not found
+
+        "409":
+          description: Attendee already registered
+
+
+  /events/{eventId}/statistics:
+
+    get:
+      summary: Get event statistics
+      operationId: getEventStatistics
+
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^EVT-[0-9]{6}$"
+
+      responses:
+        "200":
+          description: Event statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventStatistics"
+
+        "404":
+          description: Event not found
+
+
+components:
+
+  schemas:
+
+    CreateEventRequest:
+      type: object
+      required:
+        - name
+        - category
+        - startDate
+        - capacity
+      properties:
+
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+
+        category:
+          type: string
+          enum:
+            - CONFERENCE
+            - WORKSHOP
+            - MEETUP
+            - WEBINAR
+
+        startDate:
+          type: string
+          format: date-time
+
+        capacity:
+          type: integer
+          minimum: 1
+          maximum: 10000
+
+        description:
+          type: string
+          maxLength: 500
+
+
+    UpdateEventRequest:
+      type: object
+      properties:
+
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+
+        category:
+          type: string
+          enum:
+            - CONFERENCE
+            - WORKSHOP
+            - MEETUP
+            - WEBINAR
+
+        capacity:
+          type: integer
+          minimum: 1
+          maximum: 10000
+
+        description:
+          type: string
+          maxLength: 500
+
+
+    Event:
+      type: object
+      required:
+        - id
+        - name
+        - category
+        - startDate
+        - capacity
+        - status
+      properties:
+
+        id:
+          type: string
+          pattern: "^EVT-[0-9]{6}$"
+
+        name:
+          type: string
+
+        category:
+          type: string
+          enum:
+            - CONFERENCE
+            - WORKSHOP
+            - MEETUP
+            - WEBINAR
+
+        startDate:
+          type: string
+          format: date-time
+
+        capacity:
+          type: integer
+
+        status:
+          type: string
+          enum:
+            - UPCOMING
+            - ACTIVE
+            - COMPLETED
+            - CANCELLED
+
+        description:
+          type: string
+          nullable: true
+
+
+    AttendeeRequest:
+      type: object
+      required:
+        - name
+        - email
+      properties:
+
+        name:
+          type: string
+          minLength: 2
+          maxLength: 80
+
+        email:
+          type: string
+          format: email
+
+        ticketType:
+          type: string
+          enum:
+            - STANDARD
+            - VIP
+            - STUDENT
+
+
+    Attendee:
+      type: object
+      required:
+        - id
+        - name
+        - email
+        - ticketType
+      properties:
+
+        id:
+          type: string
+
+        name:
+          type: string
+
+        email:
+          type: string
+          format: email
+
+        ticketType:
+          type: string
+          enum:
+            - STANDARD
+            - VIP
+            - STUDENT
+
+
+    EventStatistics:
+      type: object
+      required:
+        - totalCapacity
+        - registeredAttendees
+        - availableSeats
+      properties:
+
+        totalCapacity:
+          type: integer
+
+        registeredAttendees:
+          type: integer
+
+        availableSeats:
+          type: integer
+
+        occupancyPercentage:
+          type: number
+          minimum: 0
+          maximum: 100

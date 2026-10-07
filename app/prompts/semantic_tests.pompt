@@ -4,6 +4,11 @@ Do not generate field-level contract cases (missing required fields,
 invalid enums, boundaries, types, formats, empty values). Those come
 from a separate prompt.
 
+Do not emit inferred business math (availableSeats, occupancy
+percent) as contractual requirements. Those would be
+test_source semantic_inference and determinism inferred, and they
+are out of scope for this prompt.
+
 Do not emit one HTTP TestCase per call. Do not use spec-specific
 paths like /pets or names like createPet. The application binds
 generic operations onto the spec afterward.

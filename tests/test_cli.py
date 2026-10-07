@@ -5,7 +5,7 @@ from app.cli import DEFAULT_EXPORT_PATH, main
 from app.schemas.schemas import HttpMethod, TestCase, TestCaseType, TestData, TestResult, TestStatus
 from app.services.export import export_test_cases
 from app.services.openapi_ingest import PROJECT_ROOT
-from app.services.pipeline import GenerationResult
+from app.services.pipeline import GenerationResult, PipelineIssue
 
 EXPORT_PATH = "exports/cli_test_output.json"
 
@@ -69,6 +69,33 @@ def test_cli_generate_prints_dropped_reasons(monkeypatch) -> None:
     output = stdout.getvalue()
     assert "Contract: 2, semantic: 1, kept: 1, dropped: 1" in output
     assert "Dropped createPet_missing_name_dup: duplicate of an earlier scenario" in output
+
+
+def test_cli_generate_prints_validation_warnings(monkeypatch) -> None:
+    case = _sample_case()
+    monkeypatch.setattr(
+        "app.cli.generate_pipeline",
+        lambda spec_file: GenerationResult(
+            cases=[case],
+            contract_count=1,
+            semantic_count=0,
+            validation_warnings=[
+                PipelineIssue(
+                    severity="warning",
+                    code="boundary_mismatch",
+                    message="capacity value 50 does not match constraint MAX+1",
+                    test_name=case.name,
+                    stage="contract",
+                    path="capacity",
+                    rule="boundary",
+                )
+            ],
+        ),
+    )
+    stdout = StringIO()
+    main(stdin=StringIO("1\nfixtures/petstore.ingest.json\n4\n"), stdout=stdout)
+    output = stdout.getvalue()
+    assert "Warning getPets_happy_path: capacity value 50 does not match constraint MAX+1" in output
 
 
 def test_cli_export_requires_generated_scenarios() -> None:
