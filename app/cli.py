@@ -4,12 +4,13 @@ import json
 import sys
 
 from app.env import load_env
-from app.schemas.schemas import TestCase, TestResult
-from app.services.export import export_test_cases
+from app.schemas.schemas import ExecutionResult, TestCase
+from app.services.export import export_execution_result, export_test_cases
 from app.services.happy_path_tests import generate_pipeline
-from app.services.runner import execute_workflow, load_test_cases
+from app.services.runner import execute_suite, load_test_cases
 
 DEFAULT_EXPORT_PATH = "exports/happy_path_tests.json"
+DEFAULT_RESULTS_PATH = "exports/execution_results.json"
 
 MENU = """
 AI API Contract Testing
@@ -39,7 +40,7 @@ def main(stdin=None, stdout=None) -> int:
         elif choice == "2":
             _export_scenarios(stdin, stdout, generated)
         elif choice == "3":
-            _run_scenarios(stdin, stdout)
+            _run_scenarios(stdin, stdout, generated)
         elif choice == "4":
             stdout.write("Exiting.\n")
             return 0
@@ -85,38 +86,49 @@ def _export_scenarios(stdin, stdout, cases: list[TestCase]) -> None:
     stdout.write(f"Exported {len(cases)} scenario(s) to {dest}\n")
 
 
-def _run_scenarios(stdin, stdout) -> None:
-    stdout.write(f"Test file [{DEFAULT_EXPORT_PATH}]: ")
-    stdout.flush()
-    path = stdin.readline().strip() or DEFAULT_EXPORT_PATH
+def _run_scenarios(stdin, stdout, generated: list[TestCase]) -> None:
+    path = ""
+    if generated:
+        stdout.write(f"Running {len(generated)} generated scenario(s).\n")
+    else:
+        stdout.write(f"Test file [{DEFAULT_EXPORT_PATH}]: ")
+        stdout.flush()
+        path = stdin.readline().strip() or DEFAULT_EXPORT_PATH
     stdout.write("API base URL: ")
     stdout.flush()
     base_url = stdin.readline().strip()
     if not base_url:
         stdout.write("API base URL is required.\n")
         return
+    stdout.write(f"Results file [{DEFAULT_RESULTS_PATH}]: ")
+    stdout.flush()
+    results_path = stdin.readline().strip() or DEFAULT_RESULTS_PATH
     try:
-        cases = load_test_cases(path)
-        results = execute_workflow(cases, base_url)
+        cases = generated if generated else load_test_cases(path)
+        result = execute_suite(cases, base_url)
+        dest = export_execution_result(result, results_path)
     except (FileNotFoundError, ValueError, OSError) as exc:
         stdout.write(f"Error: {exc}\n")
         return
-    stdout.write(_format_results(cases, results) + "\n")
+    stdout.write(_format_execution(result) + "\n")
+    stdout.write(f"Wrote results to {dest}\n")
 
 
 def _format_cases(cases: list[TestCase]) -> str:
     return json.dumps([case.model_dump(mode="json") for case in cases], indent=2)
 
 
-def _format_results(cases: list[TestCase], results: list[TestResult]) -> str:
-    names = {case.id: case.name for case in cases}
-    lines: list[str] = []
-    for result in results:
-        name = names.get(result.test_case_id, str(result.test_case_id))
-        actual = result.actual_status if result.actual_status is not None else "-"
-        line = f"{name}: {result.status.value} (status {actual})"
-        if result.errors:
-            line += " — " + "; ".join(result.errors)
+def _format_execution(result: ExecutionResult) -> str:
+    lines = [
+        f"Ran: {len(result.results)}, passed: {result.passed}, failed: {result.failed}, "
+        f"error: {result.error}, skipped: {result.skipped}"
+    ]
+    for item in result.results:
+        name = item.test_name or str(item.test_case_id)
+        actual = item.actual_status if item.actual_status is not None else "-"
+        line = f"{name}: {item.status.value} (status {actual})"
+        if item.errors:
+            line += " — " + "; ".join(item.errors)
         lines.append(line)
     return "\n".join(lines)
 

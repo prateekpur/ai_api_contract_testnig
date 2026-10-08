@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
-from app.schemas.schemas import TestCase
+from app.schemas.schemas import ExecutionResult, TestCase
 from app.services.openapi_ingest import resolve_spec_path
 
 
@@ -16,7 +17,12 @@ def export_test_cases(cases: list[TestCase], output_path: str | Path) -> Path:
     return dest
 
 
-def _to_json(payload: list[dict]) -> str:
-    import json
+def export_execution_result(result: ExecutionResult, output_path: str | Path) -> Path:
+    dest = resolve_spec_path(output_path)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(_to_json(result.model_dump(mode="json")) + "\n")
+    return dest
 
+
+def _to_json(payload: object) -> str:
     return json.dumps(payload, indent=2)

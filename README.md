@@ -28,7 +28,7 @@ python -m app
 
 1. **Generate all tests** — path to OpenAPI YAML or ingest JSON (for example `sample_specs/petstore.yaml`)
 2. **Export scenarios** — writes JSON (default `exports/happy_path_tests.json`)
-3. **Run scenarios** — loads that JSON and hits the API base URL (for example `http://localhost:8000`)
+3. **Run scenarios** — sends generated tests (or an export file) to the API executor
 4. **Exit**
 
 Option 1 runs both prompts, then merge → dedupe → validate. It prints:
@@ -38,7 +38,7 @@ Contract: N, semantic: M, kept: K, dropped: D
 Dropped <name>: <reason>
 ```
 
-Generate before export in the same session. Run can load an existing export file without generating first.
+Generate before export in the same session. Option 3 runs in-session generated cases when they exist; otherwise it loads an export file. After the run it prints a suite summary and writes `exports/execution_results.json`.
 
 ## How generation works
 
@@ -72,6 +72,18 @@ OpenAPI ingest
 - a `{{var}}` has no matching `dependencies` entry
 - `source_test` is not in the final list
 
+## How execution works
+
+```
+Generated TestCase list
+  → ApiExecutor
+  → HTTP request
+  → Actual API response
+  → ExecutionResult
+```
+
+The executor walks cases in dependency order, resolves `{{placeholders}}` from prior responses, sends each request, and records status, body, headers, and schema checks. A failed predecessor marks dependents `skipped`. Independent cases still run sequentially.
+
 ## HTTP API
 
 ```bash
@@ -88,6 +100,7 @@ The API is at [http://127.0.0.1:8000](http://127.0.0.1:8000). Interactive docs: 
 | `GET` | `/specs/{id}` | Full discovered spec |
 | `GET` | `/specs/{id}/endpoints` | Discovered operations only |
 | `POST` | `/tests/happy-path` | Generate tests (same dual-track pipeline as the CLI) |
+| `POST` | `/tests/run` | Execute generated or exported tests and return an `ExecutionResult` |
 
 Ingest from a project-relative path:
 
@@ -110,6 +123,14 @@ Generate tests:
 curl -X POST "http://127.0.0.1:8000/tests/happy-path?path=sample_specs/petstore.yaml"
 ```
 
+Run generated tests against a live API:
+
+```bash
+curl -X POST "http://127.0.0.1:8000/tests/run" \
+  -H "Content-Type: application/json" \
+  -d '{"base_url":"http://localhost:8000","path":"exports/happy_path_tests.json"}'
+```
+
 ## Sample specs
 
 - `sample_specs/petstore.yaml` — pets CRUD (`http://localhost:8000`)
@@ -130,7 +151,7 @@ curl -X POST "http://127.0.0.1:8000/tests/happy-path?path=sample_specs/petstore.
 pytest
 ```
 
-Coverage includes OpenAPI parse and ingest, contract and semantic prompt loading, TestCase parse and `$ref` expansion, merge/dedupe/validation, CLI generate/export/run, placeholder interpolation, extraction, schema validation, and the workflow runner.
+Coverage includes OpenAPI parse and ingest, contract and semantic prompt loading, TestCase parse and `$ref` expansion, merge/dedupe/validation, CLI generate/export/run, placeholder interpolation, extraction, schema validation, and the API executor.
 
 ## Project layout
 
@@ -142,14 +163,14 @@ app/
   prompts/semantic_tests.pompt   Generic workflow prompt (create then get, …)
   prompts/loader.py              Inject spec JSON into prompts
   routers/specs.py               Ingest and discovery routes
-  routers/tests.py               Test generation route
-  schemas/schemas.py             ApiSpec, Endpoint, TestCase, TestResult
+  routers/tests.py               Test generation and run routes
+  schemas/schemas.py             ApiSpec, Endpoint, TestCase, ExecutionResult
   services/openapi_ingest.py     YAML → ApiSpec parser
   services/happy_path_tests.py   Run both tracks and parse JSON
   services/semantic_workflows.py Bind generic steps onto spec endpoints
   services/pipeline.py           Merge, fingerprint dedupe, self-validation
-  services/export.py             Write scenarios to JSON
-  services/runner.py             Execute chained tests against a live API
+  services/export.py             Write scenarios and execution results to JSON
+  services/runner.py             ApiExecutor: generated tests → HTTP → ExecutionResult
 sample_specs/
 tests/
 ```

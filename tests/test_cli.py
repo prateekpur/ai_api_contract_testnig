@@ -1,9 +1,19 @@
+from datetime import datetime, timezone
 from io import StringIO
+from pathlib import Path
 from uuid import uuid4
 
-from app.cli import DEFAULT_EXPORT_PATH, main
-from app.schemas.schemas import HttpMethod, TestCase, TestCaseType, TestData, TestResult, TestStatus
-from app.services.export import export_test_cases
+from app.cli import DEFAULT_EXPORT_PATH, DEFAULT_RESULTS_PATH, main
+from app.schemas.schemas import (
+    ExecutionResult,
+    HttpMethod,
+    TestCase,
+    TestCaseType,
+    TestData,
+    TestResult,
+    TestStatus,
+)
+from app.services.export import export_execution_result, export_test_cases
 from app.services.openapi_ingest import PROJECT_ROOT
 from app.services.pipeline import GenerationResult, PipelineIssue
 
@@ -132,21 +142,78 @@ def test_cli_run_requires_base_url() -> None:
     assert "API base URL is required." in stdout.getvalue()
 
 
+def _passed_suite(case: TestCase) -> ExecutionResult:
+    return ExecutionResult(
+        base_url="http://localhost:8000",
+        started_at=datetime.now(timezone.utc),
+        duration_ms=2.0,
+        passed=1,
+        failed=0,
+        error=0,
+        skipped=0,
+        results=[
+            TestResult(
+                test_case_id=case.id,
+                test_name=case.name,
+                status=TestStatus.PASSED,
+                expected_status=200,
+                actual_status=200,
+                url="http://localhost:8000/pets",
+            )
+        ],
+    )
+
+
 def test_cli_run_scenarios(monkeypatch) -> None:
     case = _sample_case()
-    result = TestResult(
-        test_case_id=case.id,
-        status=TestStatus.PASSED,
-        expected_status=200,
-        actual_status=200,
-    )
     monkeypatch.setattr("app.cli.load_test_cases", lambda path: [case])
-    monkeypatch.setattr("app.cli.execute_workflow", lambda cases, base_url: [result])
+    monkeypatch.setattr("app.cli.execute_suite", lambda cases, base_url: _passed_suite(case))
+    monkeypatch.setattr("app.cli.export_execution_result", lambda result, path: Path(path))
     stdout = StringIO()
-    main(stdin=StringIO("3\nexports/happy_path_tests.json\nhttp://localhost:8000\n4\n"), stdout=stdout)
+    main(
+        stdin=StringIO("3\nexports/happy_path_tests.json\nhttp://localhost:8000\n\n4\n"),
+        stdout=stdout,
+    )
     output = stdout.getvalue()
+    assert "Ran: 1, passed: 1, failed: 0, error: 0, skipped: 0" in output
     assert "getPets_happy_path: passed (status 200)" in output
+    assert f"Wrote results to {DEFAULT_RESULTS_PATH}" in output
     assert "Exiting." in output
+
+
+def test_cli_run_generated_cases(monkeypatch) -> None:
+    case = _sample_case()
+    monkeypatch.setattr(
+        "app.cli.generate_pipeline",
+        lambda spec_file: GenerationResult(cases=[case], contract_count=1, semantic_count=0),
+    )
+    monkeypatch.setattr("app.cli.execute_suite", lambda cases, base_url: _passed_suite(cases[0]))
+    monkeypatch.setattr("app.cli.export_execution_result", lambda result, path: Path(path))
+    stdout = StringIO()
+    main(
+        stdin=StringIO("1\nfixtures/petstore.ingest.json\n3\nhttp://localhost:8000\n\n4\n"),
+        stdout=stdout,
+    )
+    output = stdout.getvalue()
+    assert "Running 1 generated scenario(s)." in output
+    assert "Ran: 1, passed: 1, failed: 0, error: 0, skipped: 0" in output
+    assert "getPets_happy_path: passed (status 200)" in output
+
+
+def test_export_execution_result_writes_json() -> None:
+    dest = PROJECT_ROOT / "exports" / "unit_execution_result.json"
+    dest.unlink(missing_ok=True)
+    try:
+        written = export_execution_result(
+            _passed_suite(_sample_case()),
+            "exports/unit_execution_result.json",
+        )
+        assert written == dest
+        assert dest.is_file()
+        assert "getPets_happy_path" in dest.read_text()
+        assert DEFAULT_RESULTS_PATH.endswith(".json")
+    finally:
+        dest.unlink(missing_ok=True)
 
 
 def test_export_test_cases_writes_json() -> None:

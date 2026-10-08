@@ -207,11 +207,14 @@ class TestResult(BaseModel):
 
     id: UUID = Field(default_factory=uuid4)
     test_case_id: UUID
+    test_name: str = ""
     status: TestStatus
     expected_status: int
     actual_status: int | None = None
+    url: str | None = None
     request: TestData | None = None
     response_body: Any = None
+    response_headers: dict[str, str] | None = None
     schema_valid: bool | None = None
     errors: list[str] = Field(default_factory=list)
     duration_ms: float | None = None
@@ -221,6 +224,38 @@ class TestResult(BaseModel):
     @property
     def passed(self) -> bool:
         return self.status == TestStatus.PASSED
+
+
+class ExecutorConfig(BaseModel):
+    """How the API executor talks to the system under test."""
+
+    base_url: str
+    timeout_s: float = 10
+    default_headers: dict[str, str] = Field(default_factory=dict)
+
+
+class ExecutionResult(BaseModel):
+    """Suite-level outcome of one executor run."""
+
+    run_id: UUID = Field(default_factory=uuid4)
+    base_url: str
+    started_at: datetime
+    duration_ms: float
+    passed: int = 0
+    failed: int = 0
+    error: int = 0
+    skipped: int = 0
+    results: list[TestResult] = Field(default_factory=list)
+
+
+class RunTestsRequest(BaseModel):
+    """HTTP payload for executing generated or exported tests."""
+
+    base_url: str
+    cases: list[TestCase] | None = None
+    path: str | None = None
+    timeout_s: float = 10
+    default_headers: dict[str, str] = Field(default_factory=dict)
 
 
 SchemaDefinition.model_rebuild()
