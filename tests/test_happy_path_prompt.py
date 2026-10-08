@@ -132,8 +132,11 @@ def test_load_semantic_prompt_uses_user_file() -> None:
     prompt = load_semantic_prompt("fixtures/petstore.ingest.json")
     assert "semantic" in prompt.lower()
     assert "workflow" in prompt.lower()
+    assert '"steps"' in prompt or "steps" in prompt
+    assert "POST /resources" in prompt
     assert "Simple Pet Store API" in prompt
     assert "{{SPEC_JSON}}" not in prompt
+    assert "one HTTP TestCase per call" in prompt
 
 
 def test_parse_expands_schema_refs() -> None:

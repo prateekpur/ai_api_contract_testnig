@@ -32,6 +32,19 @@ class TestCaseType(str, Enum):
     SCHEMA = "schema"
 
 
+class Determinism(str, Enum):
+    DETERMINISTIC = "deterministic"
+    INFERRED = "inferred"
+    CONDITIONAL = "conditional"
+    UNKNOWN = "unknown"
+
+
+class TestSource(str, Enum):
+    CONTRACT = "contract"
+    SEMANTIC_INFERENCE = "semantic_inference"
+    SECURITY_INFERENCE = "security_inference"
+
+
 class TestStatus(str, Enum):
     PASSED = "passed"
     FAILED = "failed"
@@ -139,6 +152,32 @@ class Dependency(VariableExtraction):
     """A prior test case this test needs, with a variable taken from its response."""
 
 
+class SemanticStep(BaseModel):
+    """One generic HTTP operation in a reusable semantic workflow."""
+
+    operation: str
+    expected_status: int | None = None
+
+
+class SemanticDependency(BaseModel):
+    """Pull a value from an earlier workflow step into a named variable."""
+
+    type: str = "DATA_DEPENDENCY"
+    source_path: str
+    variable: str
+    source_step: int | None = None
+
+
+class SemanticWorkflow(BaseModel):
+    """Spec-agnostic workflow that the app renders into TestCase steps."""
+
+    name: str
+    case_type: str = "semantic"
+    description: str | None = None
+    steps: list[SemanticStep]
+    dependencies: list[SemanticDependency] = Field(default_factory=list)
+
+
 class TestCase(BaseModel):
     """A generated or authored contract test for one endpoint."""
 
@@ -153,7 +192,14 @@ class TestCase(BaseModel):
     dependencies: list[Dependency] = Field(default_factory=list)
     expected_status: int = 200
     expected_schema: SchemaDefinition | None = None
+    expected_schema_ref: str | None = None
     case_type: TestCaseType = TestCaseType.HAPPY_PATH
+    determinism: Determinism = Determinism.UNKNOWN
+    test_source: TestSource = TestSource.CONTRACT
+    happy_path_contract_valid: bool | None = None
+    mutated_field: str | None = None
+    constraint: str | None = None
+    classification_reason: str | None = None
 
 
 class TestResult(BaseModel):
@@ -161,11 +207,14 @@ class TestResult(BaseModel):
 
     id: UUID = Field(default_factory=uuid4)
     test_case_id: UUID
+    test_name: str = ""
     status: TestStatus
     expected_status: int
     actual_status: int | None = None
+    url: str | None = None
     request: TestData | None = None
     response_body: Any = None
+    response_headers: dict[str, str] | None = None
     schema_valid: bool | None = None
     errors: list[str] = Field(default_factory=list)
     duration_ms: float | None = None
@@ -175,6 +224,38 @@ class TestResult(BaseModel):
     @property
     def passed(self) -> bool:
         return self.status == TestStatus.PASSED
+
+
+class ExecutorConfig(BaseModel):
+    """How the API executor talks to the system under test."""
+
+    base_url: str
+    timeout_s: float = 10
+    default_headers: dict[str, str] = Field(default_factory=dict)
+
+
+class ExecutionResult(BaseModel):
+    """Suite-level outcome of one executor run."""
+
+    run_id: UUID = Field(default_factory=uuid4)
+    base_url: str
+    started_at: datetime
+    duration_ms: float
+    passed: int = 0
+    failed: int = 0
+    error: int = 0
+    skipped: int = 0
+    results: list[TestResult] = Field(default_factory=list)
+
+
+class RunTestsRequest(BaseModel):
+    """HTTP payload for executing generated or exported tests."""
+
+    base_url: str
+    cases: list[TestCase] | None = None
+    path: str | None = None
+    timeout_s: float = 10
+    default_headers: dict[str, str] = Field(default_factory=dict)
 
 
 SchemaDefinition.model_rebuild()

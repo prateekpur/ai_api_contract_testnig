@@ -14,6 +14,7 @@ from app.prompts.loader import load_api_spec, load_contract_prompt, load_semanti
 from app.schemas.schemas import ApiSpec, SchemaDefinition, TestCase
 from app.services.openapi_ingest import PROJECT_ROOT
 from app.services.pipeline import GenerationResult, finalize_cases
+from app.services.semantic_workflows import parse_semantic_workflows, render_semantic_workflows
 
 _TEST_CASES = TypeAdapter(list[TestCase])
 _FENCE_BLOCK = re.compile(r"```(?:json)?\s*(.*?)\s*```", re.IGNORECASE | re.DOTALL)
@@ -33,7 +34,7 @@ def generate_pipeline(
     *,
     model: str | None = None,
 ) -> GenerationResult:
-    """Run both generation tracks and return cases plus drop counts."""
+    """Generate both tracks, then run validation before returning the suite."""
     if not spec_file:
         raise ValueError("SPEC_FILE is required")
     _, spec = load_api_spec(spec_file)
@@ -82,6 +83,8 @@ def _execute_prompt(
             last_error = ValueError(f"{label}: Model returned an empty response")
             continue
         try:
+            if label == "semantic-tests":
+                return parse_semantic_tests(content, spec=spec)
             return parse_happy_path_tests(content, spec=spec)
         except ValueError as exc:
             last_error = ValueError(f"{label}: {exc}")
@@ -100,6 +103,14 @@ def parse_happy_path_tests(content: str, spec: ApiSpec | None = None) -> list[Te
     if spec is None:
         return cases
     return [_expand_case_refs(case, spec.schemas) for case in cases]
+
+
+def parse_semantic_tests(content: str, spec: ApiSpec | None = None) -> list[TestCase]:
+    payload = _load_json(_extract_json_text(content))
+    workflows = parse_semantic_workflows(payload)
+    if spec is None:
+        raise ValueError("Spec is required to render semantic workflows")
+    return [_expand_case_refs(case, spec.schemas) for case in render_semantic_workflows(workflows, spec)]
 
 
 def _model_text(content: object) -> str:
