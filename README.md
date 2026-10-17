@@ -2,12 +2,12 @@
 
 Ingest an OpenAPI YAML spec, generate tests from it, export them as JSON, and run them against a live API.
 
-Generation is dual-track. Both tracks emit the same `TestCase` shape, so export and run stay unchanged:
+Generation is dual-track. Both tracks emit the same `TestCase` shape, so export and the executor consume one list:
 
 1. **Contract** — schema-driven cases: happy path, required/enum/boundary/null/type, query/path, documented error statuses
 2. **Semantic** — business and workflow cases: create→get, create→delete, 404 after delete, cross-endpoint ids via `{{placeholders}}` and `dependencies`
 
-The lists are merged (contract first), fingerprint-deduped, then checked programmatically. Invalid or duplicate cases are dropped and listed in the generate log.
+Each track is validated against the contract, then the lists are merged (contract first), fingerprint-deduped, and checked again. Invalid or duplicate cases are dropped and listed in the generate log.
 
 ## Setup
 
@@ -31,11 +31,12 @@ python -m app
 3. **Run scenarios** — sends generated tests (or an export file) to the API executor
 4. **Exit**
 
-Option 1 runs both prompts, then merge → dedupe → validate. It prints:
+Option 1 runs both prompts, then per-track validation → merge → dedupe → structural checks → suite validation. It prints:
 
 ```
 Contract: N, semantic: M, kept: K, dropped: D
 Dropped <name>: <reason>
+Warning <name>: <reason>
 ```
 
 Generate before export in the same session. Option 3 runs in-session generated cases when they exist; otherwise it loads an export file. After the run it prints a suite summary and writes `exports/execution_results.json`.
@@ -48,20 +49,21 @@ OpenAPI ingest
   → semantic_tests.pompt (generic workflows)
   → bind steps onto the spec
   → parse / expand $ref
+  → per-track contract validation
   → merge
   → fingerprint dedupe
-  → self-validation
-  → contract consistency / quality gate
+  → structural self-validation
+  → suite quality gate
   → final TestCase list
 ```
 
 **Contract track** (`app/prompts/contract_tests.pompt`) does not invent statuses. Success uses the lowest declared 2xx; errors use a documented 4xx.
 
-**Semantic track** (`app/prompts/semantic_tests.pompt`) emits generic workflows (`POST /resources`, `GET /resources/{resourceId}`, `case_type: semantic`), not Petstore-specific TestCases. The app binds those steps onto the spec (names, paths, bodies, statuses) before merge.
+**Semantic track** (`app/prompts/semantic_tests.pompt`) emits generic workflows (`POST /resources`, `GET /resources/{resourceId}`, workflow `case_type: semantic`), not Petstore-specific TestCases. The app binds those steps onto the spec as `TestCase`s (`happy_path` or `negative`, `test_source: semantic_inference`) before merge.
 
-**Dedupe** keeps the first case with the same `(method, path, expected_status, case_type, canonical test_data)`. Contract wins when both tracks invent the same request.
+**Dedupe** keeps the first case with the same `(method, path, expected_status, case_type, mutated_field, constraint, canonical test_data)`. Contract wins when both tracks invent the same request.
 
-**Quality gate** (no extra model call) then checks every request against the contract. A happy-path or 2xx test whose body/params violate type, enum, format, pattern, or bounds is dropped. Schema-violation → 4xx cases are kept as `determinism: inferred`, not as proven contract behavior.
+**Quality gate** (no extra model call) runs on each track and again on the merged suite. A happy-path or 2xx test whose body/params violate type, enum, format, pattern, or bounds is dropped. Schema-violation → 4xx cases are kept as `determinism: inferred`, not as proven contract behavior.
 
 **Self-validation** (no extra model call) drops a case when:
 
@@ -91,6 +93,8 @@ uvicorn app.main:app --reload
 ```
 
 The API is at [http://127.0.0.1:8000](http://127.0.0.1:8000). Interactive docs: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+
+This app defaults to port 8000, the same host as `sample_specs/petstore.yaml`. Ingest and generate do not need the target API running. To execute against Petstore at the same time, start this app on another port (`uvicorn app.main:app --reload --port 8081`).
 
 | Method | Path | Description |
 |---|---|---|
@@ -123,18 +127,19 @@ Generate tests:
 curl -X POST "http://127.0.0.1:8000/tests/happy-path?path=sample_specs/petstore.yaml"
 ```
 
-Run generated tests against a live API:
+Run exported tests against a live API (this app on 8081, target API on 8000):
 
 ```bash
-curl -X POST "http://127.0.0.1:8000/tests/run" \
+curl -X POST "http://127.0.0.1:8081/tests/run" \
   -H "Content-Type: application/json" \
   -d '{"base_url":"http://localhost:8000","path":"exports/happy_path_tests.json"}'
 ```
 
 ## Sample specs
 
-- `sample_specs/petstore.yaml` — pets CRUD (`http://localhost:8000`)
+- `sample_specs/petstore.yaml` — pets CRUD (target API `http://localhost:8000`)
 - `sample_specs/insurance_api.yaml` — policies and customers, with query params, enums, formats, and constraints
+- `sample_specs/arbitary_api.yaml` — events and attendees (used by the quality-gate and validator tests)
 
 ## What the parser extracts
 
@@ -168,7 +173,11 @@ app/
   services/openapi_ingest.py     YAML → ApiSpec parser
   services/happy_path_tests.py   Run both tracks and parse JSON
   services/semantic_workflows.py Bind generic steps onto spec endpoints
-  services/pipeline.py           Merge, fingerprint dedupe, self-validation
+  services/classification.py     Stamp test_source and determinism
+  services/validation.py         Request/response contract checks
+  services/pipeline.py           Validate, merge, fingerprint dedupe
+  services/placeholders.py       Resolve {{variables}} in test data
+  services/extraction.py         Pull values from prior responses
   services/export.py             Write scenarios and execution results to JSON
   services/runner.py             ApiExecutor: generated tests → HTTP → ExecutionResult
 sample_specs/
